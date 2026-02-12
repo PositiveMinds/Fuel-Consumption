@@ -23,25 +23,56 @@ initTheme();
 
 // Flatpickr initialization for date fields
 function initFlatpickr() {
+    // Initialize New Entry Modal Date Fields
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
     
-    if (startDateInput && !startDateInput._flatpickr) {
+    if (startDateInput) {
+        if (startDateInput._flatpickr) {
+            startDateInput._flatpickr.destroy();
+        }
         flatpickr(startDateInput, {
             mode: 'single',
             dateFormat: 'Y-m-d',
-            altFormat: 'M d, Y',
-            altInput: true,
             placeholder: 'Select start date'
         });
     }
     
-    if (endDateInput && !endDateInput._flatpickr) {
+    if (endDateInput) {
+        if (endDateInput._flatpickr) {
+            endDateInput._flatpickr.destroy();
+        }
         flatpickr(endDateInput, {
             mode: 'single',
             dateFormat: 'Y-m-d',
-            altFormat: 'M d, Y',
-            altInput: true,
+            placeholder: 'Select end date'
+        });
+    }
+}
+
+// Flatpickr initialization for edit modal date fields
+function initEditFlatpickr() {
+    const editStartDateInput = document.getElementById('editStartDate');
+    const editEndDateInput = document.getElementById('editEndDate');
+    
+    if (editStartDateInput) {
+        if (editStartDateInput._flatpickr) {
+            editStartDateInput._flatpickr.destroy();
+        }
+        flatpickr(editStartDateInput, {
+            mode: 'single',
+            dateFormat: 'Y-m-d',
+            placeholder: 'Select start date'
+        });
+    }
+    
+    if (editEndDateInput) {
+        if (editEndDateInput._flatpickr) {
+            editEndDateInput._flatpickr.destroy();
+        }
+        flatpickr(editEndDateInput, {
+            mode: 'single',
+            dateFormat: 'Y-m-d',
             placeholder: 'Select end date'
         });
     }
@@ -197,50 +228,61 @@ editEquipmentSelect.addEventListener('change', function () {
 });
 
 function calculateConsumption() {
-    const site = document.getElementById('site').value;
-    const period = document.getElementById('period').value;
-    const date = document.getElementById('date').value;
-    const startTime = document.getElementById('startTime').value;
-    const endTime = document.getElementById('endTime').value;
-    const liters = parseFloat(document.getElementById('liters').value);
-    const distance = parseFloat(document.getElementById('distance').value) || 0;
-    let operator = operatorSelect.value;
-    let equipment = equipmentSelect.value;
+     const site = document.getElementById('site').value;
+     const period = document.getElementById('period').value;
+     const startDate = document.getElementById('startDate').value;
+     const endDate = document.getElementById('endDate').value;
+     const startTime = document.getElementById('startTime').value;
+     const endTime = document.getElementById('endTime').value;
+     const liters = parseFloat(document.getElementById('liters').value);
+     const distance = parseFloat(document.getElementById('distance').value) || 0;
+     let operator = operatorSelect.value;
+     let equipment = equipmentSelect.value;
 
-    if (operator === 'other') {
-        operator = customOperatorInput.value.trim();
-    }
+     if (operator === 'other') {
+         operator = customOperatorInput.value.trim();
+     }
 
-    // Validation
-    if (!site || site.trim() === '') {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Site',
-            text: 'Please enter the site name',
-            confirmButtonColor: '#2563eb'
-        });
-        return;
-    }
+     // Validation
+     if (!site || site.trim() === '') {
+         Swal.fire({
+             icon: 'warning',
+             title: 'Missing Site',
+             text: 'Please enter the site name',
+             confirmButtonColor: '#2563eb'
+         });
+         return;
+     }
 
-    if (!period) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Period',
-            text: 'Please select the month and year',
-            confirmButtonColor: '#2563eb'
-        });
-        return;
-    }
+     if (!period) {
+         Swal.fire({
+             icon: 'warning',
+             title: 'Missing Period',
+             text: 'Please select the month and year',
+             confirmButtonColor: '#2563eb'
+         });
+         return;
+     }
 
-    if (!date) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Date',
-            text: 'Please select the date',
-            confirmButtonColor: '#2563eb'
-        });
-        return;
-    }
+     if (!startDate) {
+         Swal.fire({
+             icon: 'warning',
+             title: 'Missing Start Date',
+             text: 'Please select the start date',
+             confirmButtonColor: '#2563eb'
+         });
+         return;
+     }
+
+     if (!endDate) {
+         Swal.fire({
+             icon: 'warning',
+             title: 'Missing End Date',
+             text: 'Please select the end date',
+             confirmButtonColor: '#2563eb'
+         });
+         return;
+     }
 
     if (!startTime || !endTime) {
         Swal.fire({
@@ -337,22 +379,23 @@ function calculateConsumption() {
     document.getElementById('resultBox').style.display = 'block';
 
     // Save to history
-    const record = {
-        id: Date.now(),
-        site: site,
-        period: period,
-        date: date,
-        operator: operator,
-        equipment: equipment,
-        startTime: startTime,
-        endTime: endTime,
-        totalHours: parseFloat(totalHours),
-        distance: distance,
-        liters: liters,
-        consumption: consumption,
-        consumptionValue: consumptionValue,
-        timestamp: new Date().toLocaleString()
-    };
+     const record = {
+         id: Date.now(),
+         site: site,
+         period: period,
+         startDate: startDate,
+         endDate: endDate,
+         operator: operator,
+         equipment: equipment,
+         startTime: startTime,
+         endTime: endTime,
+         totalHours: parseFloat(totalHours),
+         distance: distance,
+         liters: liters,
+         consumption: consumption,
+         consumptionValue: consumptionValue,
+         timestamp: new Date().toLocaleString()
+     };
 
     addToHistory(record);
 
@@ -467,28 +510,37 @@ function editHistoryItem(id) {
     currentEditingId = id;
 
     // Populate the edit form
-    document.getElementById('editOperator').value = record.operator;
-    document.getElementById('editEquipment').value = record.equipment;
-    document.getElementById('editStartTime').value = record.startTime;
-    document.getElementById('editEndTime').value = record.endTime;
-    document.getElementById('editDistance').value = record.distance || '';
-    document.getElementById('editLiters').value = record.liters;
+     document.getElementById('editOperator').value = record.operator;
+     document.getElementById('editEquipment').value = record.equipment;
+     document.getElementById('editStartDate').value = record.startDate || '';
+     document.getElementById('editEndDate').value = record.endDate || '';
+     document.getElementById('editStartTime').value = record.startTime;
+     document.getElementById('editEndTime').value = record.endTime;
+     document.getElementById('editDistance').value = record.distance || '';
+     document.getElementById('editLiters').value = record.liters;
 
-    // Trigger distance field visibility
-    editEquipmentSelect.dispatchEvent(new Event('change'));
+     // Trigger distance field visibility
+     editEquipmentSelect.dispatchEvent(new Event('change'));
 
-    // Show the modal
-    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-    editModal.show();
+     // Show the modal
+     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+     editModal.show();
+     
+     // Initialize flatpickr after modal is shown
+     setTimeout(() => {
+         initEditFlatpickr();
+     }, 200);
 }
 
 function saveEditedRecord() {
-    const operator = document.getElementById('editOperator').value.trim();
-    const equipment = document.getElementById('editEquipment').value;
-    const startTime = document.getElementById('editStartTime').value;
-    const endTime = document.getElementById('editEndTime').value;
-    const distance = parseFloat(document.getElementById('editDistance').value) || 0;
-    const liters = parseFloat(document.getElementById('editLiters').value);
+     const operator = document.getElementById('editOperator').value.trim();
+     const equipment = document.getElementById('editEquipment').value;
+     const startDate = document.getElementById('editStartDate').value;
+     const endDate = document.getElementById('editEndDate').value;
+     const startTime = document.getElementById('editStartTime').value;
+     const endTime = document.getElementById('editEndTime').value;
+     const distance = parseFloat(document.getElementById('editDistance').value) || 0;
+     const liters = parseFloat(document.getElementById('editLiters').value);
 
     // Validation
     if (!operator) {
@@ -545,6 +597,10 @@ function saveEditedRecord() {
     if (recordIndex !== -1) {
         history[recordIndex] = {
             id: currentEditingId,
+            site: history[recordIndex].site,
+            period: history[recordIndex].period,
+            startDate: startDate,
+            endDate: endDate,
             operator: operator,
             equipment: equipment,
             startTime: startTime,
