@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Consumption Manager</title>
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <!-- html2pdf for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- SheetJS for Excel generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <img src="assets/images/logo.png" alt="Logo" style="height: 40px; margin-right: 10px; vertical-align: middle;">
+                <span style="vertical-align: middle;">Fuel Consumption Manager</span>
+            </span>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openNewEntryModal()">
+                    <i class="fas fa-plus"></i> New Entry
+                </button>
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openExportPanel()" title="Export Report">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container container-main">
+        <!-- Stats Row -->
+        <div class="row mb-4" id="statsRow">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="stat-icon"><i class="fas fa-list"></i></div>
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value" id="totalHours">0</div>
+                    <div class="stat-label">Total Hours</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="stat-icon"><i class="fas fa-droplet"></i></div>
+                    <div class="stat-value" id="totalLiters">0</div>
+                    <div class="stat-label">Total Liters</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="stats-card">
+                    <div class="stat-icon"><i class="fas fa-flame"></i></div>
+                    <div class="stat-value" id="avgConsumption">0</div>
+                    <div class="stat-label">Avg Consumption</div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- History Table -->
+        <div class="card fade-in mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history"></i> Fuel Entry History
+                </h5>
+                <span class="badge bg-primary" id="historyCount">0 records</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" id="tableContainer">
+                    <div class="no-data">
+                        <i class="fas fa-inbox"></i>
+                        <p class="mt-2">No fuel entries yet. Add one to get started!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hidden PDF Document Container -->
+    <div id="pdfContent" style="display: none;"></div>
+
+    <!-- Export Panel Overlay -->
+    <div id="exportOverlay" class="export-overlay" onclick="closeExportPanel()"></div>
+
+    <!-- Export Slide-in Panel -->
+    <div id="exportPanel" class="export-panel">
+        <div class="export-panel-header">
+            <h5 class="export-panel-title">
+                <i class="fas fa-file-pdf"></i> Report & Export
+            </h5>
+            <button class="export-panel-close" onclick="closeExportPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="export-panel-body">
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                <i class="fas fa-info-circle"></i> This will export all entries with their Site and Period information from the fuel entries.
+            </p>
+            
+            <!-- Export Options -->
+            <div class="export-options">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-download"></i> Export Format
+                </h6>
+
+                <!-- PDF Export -->
+                <button class="export-option-btn" onclick="generatePDFReport()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">PDF Report</div>
+                        <div class="export-option-desc">With signature lines for manual signing</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+
+                <!-- Excel Export -->
+                <button class="export-option-btn" onclick="generateExcelReport()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Excel Export</div>
+                        <div class="export-option-desc">Professionally formatted spreadsheet</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Entry Modal -->
+    <div class="modal fade" id="newEntryModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle"></i> New Fuel Entry
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="fuelForm">
+                        <!-- Site Selection -->
+                        <div class="mb-3">
+                            <label for="site" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Site
+                            </label>
+                            <input type="text" id="site" class="form-control" placeholder="Enter site name" required>
+                        </div>
+
+                        <!-- Period (Month & Year) -->
+                        <div class="mb-3">
+                            <label for="period" class="form-label">
+                                <i class="fas fa-calendar"></i> Period (Month & Year)
+                            </label>
+                            <input type="month" id="period" class="form-control" required>
+                        </div>
+
+                        <!-- Start Date -->
+                         <div class="mb-3">
+                             <label for="startDate" class="form-label">
+                                 <i class="fas fa-calendar-day"></i> Start Date
+                             </label>
+                             <input type="text" id="startDate" class="form-control" placeholder="Select start date" required>
+                         </div>
+
+                         <!-- End Date -->
+                         <div class="mb-3">
+                             <label for="endDate" class="form-label">
+                                 <i class="fas fa-calendar-day"></i> End Date
+                             </label>
+                             <input type="text" id="endDate" class="form-control" placeholder="Select end date" required>
+                         </div>
+
+                        <!-- Operator Selection -->
+                        <div class="mb-3">
+                            <label for="operator" class="form-label">
+                                <i class="fas fa-user-circle"></i> Operator (Responsible Person)
+                            </label>
+                            <div class="input-group">
+                                <select id="operator" class="form-select" required>
+                                    <option value="">-- Select Operator --</option>
+                                    <option value="Bwoye Charles">Bwoye Charles</option>
+                                    <option value="other">Other (Enter Name)</option>
+                                </select>
+                            </div>
+                            <input type="text" id="customOperator" class="form-control mt-2" placeholder="Enter operator's name" style="display: none;">
+                        </div>
+
+                        <!-- Equipment/Machinery Selection -->
+                        <div class="mb-3">
+                            <label for="equipment" class="form-label">
+                                <i class="fas fa-cog"></i> Equipment / Machinery
+                            </label>
+                            <select id="equipment" class="form-select" required>
+                                <option value="">-- Select Equipment --</option>
+                                <option value="Vehicle">Vehicle</option>
+                                <option value="Motorbike">Motorbike</option>
+                                <option value="Generator">Generator</option>
+                            </select>
+                        </div>
+
+                        <!-- Time Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startTime" class="form-label">
+                                    <i class="fas fa-play-circle"></i> Start Time
+                                </label>
+                                <input type="text" id="startTime" class="form-control timepicker" placeholder="HH:MM" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endTime" class="form-label">
+                                    <i class="fas fa-stop-circle"></i> End Time
+                                </label>
+                                <input type="text" id="endTime" class="form-control timepicker" placeholder="HH:MM" required>
+                            </div>
+                        </div>
+
+                        <!-- Distance Input (For Vehicle/Motorbike) -->
+                        <div class="mb-3" id="distanceGroup" style="display: none;">
+                            <label for="distance" class="form-label">
+                                <i class="fas fa-road"></i> Distance Covered
+                            </label>
+                            <div class="input-group">
+                                <input type="number" id="distance" class="form-control" placeholder="Enter distance" min="0" step="0.1">
+                                <span class="input-group-text">km</span>
+                            </div>
+                        </div>
+
+                        <!-- Liters Input -->
+                        <div class="mb-4">
+                            <label for="liters" class="form-label">
+                                <i class="fas fa-droplet"></i> Liters Used
+                            </label>
+                            <div class="input-group">
+                                <input type="number" id="liters" class="form-control" placeholder="Enter amount" min="0" step="0.01" required>
+                                <span class="input-group-text">L</span>
+                            </div>
+                        </div>
+
+                        <!-- Result Display (inside modal) -->
+                        <div id="resultBox" style="display: none;">
+                            <div class="result-box">
+                                <div class="result-row">
+                                    <span class="result-label">Operator / Equipment:</span>
+                                    <span class="result-value" id="displayOperator">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Start Time:</span>
+                                    <span class="result-value" id="displayStart">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">End Time:</span>
+                                    <span class="result-value" id="displayEnd">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Total Hours:</span>
+                                    <span class="result-value" id="displayHours">-</span>
+                                </div>
+                                <div class="result-row">
+                                    <span class="result-label">Liters Used:</span>
+                                    <span class="result-value" id="displayLiters">-</span>
+                                </div>
+                                <div class="consumption-highlight">
+                                    <div style="font-size: 0.9rem; margin-bottom: 5px; opacity: 0.9;">Fuel Consumption Rate</div>
+                                    <div class="consumption-value" id="displayConsumption">-</div>
+                                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.9;">Liters per Hour</div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="calculateConsumption()">
+                        <i class="fas fa-calculator"></i> Calculate & Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-pencil-alt"></i> Edit Fuel Entry
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                         <div class="mb-3">
+                             <label for="editOperator" class="form-label">Operator</label>
+                             <input type="text" id="editOperator" class="form-control" required>
+                         </div>
+
+                         <div class="mb-3">
+                             <label for="editEquipment" class="form-label">Equipment</label>
+                             <select id="editEquipment" class="form-select" required>
+                                 <option value="Vehicle">Vehicle</option>
+                                 <option value="Motorbike">Motorbike</option>
+                                 <option value="Generator">Generator</option>
+                             </select>
+                         </div>
+
+                         <div class="row mb-3">
+                             <div class="col-md-6">
+                                 <label for="editStartDate" class="form-label">Start Date</label>
+                                 <input type="date" id="editStartDate" class="form-control" required>
+                             </div>
+                             <div class="col-md-6">
+                                 <label for="editEndDate" class="form-label">End Date</label>
+                                 <input type="date" id="editEndDate" class="form-control" required>
+                             </div>
+                         </div>
+
+                         <div class="row mb-3">
+                             <div class="col-md-6">
+                                 <label for="editStartTime" class="form-label">Start Time</label>
+                                 <input type="text" id="editStartTime" class="form-control timepicker" placeholder="HH:MM" required>
+                             </div>
+                             <div class="col-md-6">
+                                 <label for="editEndTime" class="form-label">End Time</label>
+                                 <input type="text" id="editEndTime" class="form-control timepicker" placeholder="HH:MM" required>
+                             </div>
+                         </div>
+
+                        <div class="mb-3" id="editDistanceGroup" style="display: none;">
+                            <label for="editDistance" class="form-label">Distance (km)</label>
+                            <input type="number" id="editDistance" class="form-control" min="0" step="0.1">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editLiters" class="form-label">Liters Used</label>
+                            <input type="number" id="editLiters" class="form-control" min="0" step="0.01" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEditedRecord()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div class="modal fade" id="summaryModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-chart-pie"></i> Summary Statistics
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="stats-card">
+                                <div class="stat-icon"><i class="fas fa-list"></i></div>
+                                <div class="stat-value" id="modalTotalRecords">0</div>
+                                <div class="stat-label">Total Records</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stats-card">
+                                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                                <div class="stat-value" id="modalTotalHours">0</div>
+                                <div class="stat-label">Total Hours</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stats-card">
+                                <div class="stat-icon"><i class="fas fa-droplet"></i></div>
+                                <div class="stat-value" id="modalTotalLiters">0</div>
+                                <div class="stat-label">Total Liters</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stats-card">
+                                <div class="stat-icon"><i class="fas fa-flame"></i></div>
+                                <div class="stat-value" id="modalAvgConsumption">0</div>
+                                <div class="stat-label">Avg Consumption</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Modal -->
+    <div class="modal fade" id="chartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-chart-line"></i> Fuel Consumption Analytics
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="chart-container">
+                        <canvas id="consumptionChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="litersChart"></canvas>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB Button Menu -->
+    <button class="fab" id="fabButton" onclick="toggleFabMenu()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div class="fab-menu" id="fabMenu">
+        <button onclick="showSummaryModal()" title="View Summary">
+            <i class="fas fa-chart-pie"></i>
+            <span class="fab-label">Summary</span>
+        </button>
+        <button onclick="exportData()" title="Export CSV">
+            <i class="fas fa-download"></i>
+            <span class="fab-label">Export CSV</span>
+        </button>
+        <button onclick="showChart()" title="View Chart">
+            <i class="fas fa-chart-bar"></i>
+            <span class="fab-label">View Chart</span>
+        </button>
+        <button onclick="confirmClearHistory()" title="Clear All">
+            <i class="fas fa-trash"></i>
+            <span class="fab-label">Clear All</span>
+        </button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Scripts -->
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
