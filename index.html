@@ -1,10 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Consumption Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <title>Fleet Manager</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Track and manage fuel consumption efficiently across all devices">
+    <meta name="theme-color" content="#F54927">
+    <meta name="background-color" content="#ffffff">
+    
+    <!-- iOS Standalone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fleet Manager">
+    
+    <!-- Windows Tiles -->
+    <meta name="msapplication-TileColor" content="#F54927">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <!-- Icons -->
     <link rel="icon" type="image/png" href="assets/images/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/images/logo-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/logo-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/images/logo-512x512.png">
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -25,28 +48,52 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
-    <!-- Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Air Datepicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker/air-datepicker.css">
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker"></script>
     
-    <!-- html2pdf for PDF generation -->
+     <!-- html2pdf for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <!-- SheetJS for Excel generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- ExcelJS for Excel generation with better formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+    <!-- For downloading files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+    <!-- Animated Splash Screen -->
+    <div id="splashScreen" class="splash-screen active">
+        <div class="splash-content">
+            <div class="splash-logo-container">
+                <img src="assets/images/logo.png" alt="Fleet Manager Logo" class="splash-logo">
+            </div>
+            <h1 class="splash-title">Fleet Manager</h1>
+            <div class="splash-loader">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
+            <p class="splash-text">Loading...</p>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar mb-4">
         <div class="container-fluid">
             <span class="navbar-brand">
                 <img src="assets/images/logo.png" alt="Logo" style="height: 40px; margin-right: 10px; vertical-align: middle;">
-                <span style="vertical-align: middle;">Fuel Consumption Manager</span>
+                <span style="vertical-align: middle;">Fleet Manager</span>
             </span>
             <div class="d-flex gap-2">
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" id="installBtn" onclick="installApp()" title="Install App" style="display: none;">
+                    <i class="fas fa-download"></i> Install
+                </button>
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" id="notificationBtn" onclick="requestNotificationPermission()" title="Enable Notifications">
+                    <i class="fas fa-bell"></i>
+                </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openNewEntryModal()">
                     <i class="fas fa-plus"></i> New Entry
                 </button>
@@ -97,22 +144,61 @@
 
 
         <!-- History Table -->
-        <div class="card fade-in mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-history"></i> Fuel Entry History
-                </h5>
-                <span class="badge bg-primary" id="historyCount">0 records</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive" id="tableContainer">
-                    <div class="no-data">
-                        <i class="fas fa-inbox"></i>
-                        <p class="mt-2">No fuel entries yet. Add one to get started!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+         <div class="card fade-in mt-4">
+             <div class="card-header d-flex justify-content-between align-items-center">
+                 <h5 class="card-title mb-0">
+                     <i class="fas fa-history"></i> Fuel Entry History
+                 </h5>
+                 <span class="badge bg-primary" id="historyCount">0 records</span>
+             </div>
+             
+             <!-- Date Range Filter -->
+             <div class="card-body" style="border-bottom: 1px solid var(--border-color); padding: 15px 20px;">
+                 <div class="row g-2" style="align-items: flex-end;">
+                     <div class="col-md-3">
+                         <label for="filterFromDate" class="form-label" style="margin-bottom: 5px;">
+                             <i class="fas fa-calendar"></i> From Date
+                         </label>
+                         <input type="text" id="filterFromDate" class="form-control" placeholder="yyyy-MM-dd">
+                     </div>
+                     <div class="col-md-3">
+                         <label for="filterToDate" class="form-label" style="margin-bottom: 5px;">
+                             <i class="fas fa-calendar"></i> To Date
+                         </label>
+                         <input type="text" id="filterToDate" class="form-control" placeholder="yyyy-MM-dd">
+                     </div>
+                     <div class="col-md-2">
+                         <button class="btn btn-primary w-100" onclick="applyDateFilter()">
+                             <i class="fas fa-filter"></i> Filter
+                         </button>
+                     </div>
+                     <div class="col-md-2">
+                         <button class="btn btn-secondary w-100" onclick="clearDateFilter()">
+                             <i class="fas fa-redo"></i> Reset
+                         </button>
+                     </div>
+                     <div class="col-md-2">
+                         <div class="btn-group w-100" role="group">
+                             <button type="button" class="btn btn-success w-50" onclick="exportFilteredDataXLSX()" title="Export as Excel">
+                                 <i class="fas fa-file-excel"></i> XLSX
+                             </button>
+                             <button type="button" class="btn btn-success w-50" onclick="exportFilteredDataPDF()" title="Export as PDF">
+                                 <i class="fas fa-file-pdf"></i> PDF
+                             </button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             
+             <div class="card-body p-0">
+                 <div class="table-responsive" id="tableContainer">
+                     <div class="no-data">
+                         <i class="fas fa-inbox"></i>
+                         <p class="mt-2">No fuel entries yet. Add one to get started!</p>
+                     </div>
+                 </div>
+             </div>
+         </div>
 
     </div>
 
@@ -171,13 +257,49 @@
                     </div>
                 </button>
             </div>
+
+            <!-- Backup Options -->
+            <div class="export-options" style="margin-top: 30px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-database"></i> Data Backup
+                </h6>
+
+                <!-- Backup Export -->
+                <button class="export-option-btn" onclick="backupData()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-save"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Backup Data</div>
+                        <div class="export-option-desc">Download complete data backup (JSON)</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+
+                <!-- Backup Import -->
+                <button class="export-option-btn" onclick="document.getElementById('backupInput').click()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Restore Data</div>
+                        <div class="export-option-desc">Restore data from backup file</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+                <input type="file" id="backupInput" style="display: none;" accept=".json" onchange="restoreData(event)">
+            </div>
         </div>
     </div>
 
     <!-- New Entry Modal -->
     <div class="modal fade" id="newEntryModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content modal-content-adaptive">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fas fa-plus-circle"></i> New Fuel Entry
@@ -194,29 +316,43 @@
                             <input type="text" id="site" class="form-control" placeholder="Enter site name" required>
                         </div>
 
-                        <!-- Period (Month & Year) -->
+                        <!-- Period (Quarterly) -->
+                         <div class="mb-3">
+                             <label for="quarter" class="form-label">
+                                 <i class="fas fa-calendar-alt"></i> Period (Quarterly)
+                             </label>
+                             <select id="quarter" class="form-control" required>
+                                 <option value="">-- Select Quarter --</option>
+                                 <option value="Q1">Q1 (January - March)</option>
+                                 <option value="Q2">Q2 (April - June)</option>
+                                 <option value="Q3">Q3 (July - September)</option>
+                                 <option value="Q4">Q4 (October - December)</option>
+                             </select>
+                         </div>
+
+                        <!-- Year -->
+                         <div class="mb-3">
+                             <label for="year" class="form-label">
+                                 <i class="fas fa-calendar"></i> Year
+                             </label>
+                             <input type="number" id="year" class="form-control" placeholder="Enter year (e.g., 2025)" required min="2020" max="2100" readonly>
+                         </div>
+
+                        <!-- Date -->
+                         <div class="mb-3">
+                             <label for="date" class="form-label">
+                                 <i class="fas fa-calendar-day"></i> Date
+                             </label>
+                             <input type="text" id="date" class="form-control" placeholder="yyyy-MM-dd" required>
+                         </div>
+
+                        <!-- Refueling Station -->
                         <div class="mb-3">
-                            <label for="period" class="form-label">
-                                <i class="fas fa-calendar"></i> Period (Month & Year)
+                            <label for="station" class="form-label">
+                                <i class="fas fa-gas-pump"></i> Refueling Station
                             </label>
-                            <input type="month" id="period" class="form-control" required>
+                            <input type="text" id="station" class="form-control" placeholder="Enter refueling station name" required>
                         </div>
-
-                        <!-- Start Date -->
-                         <div class="mb-3">
-                             <label for="startDate" class="form-label">
-                                 <i class="fas fa-calendar-day"></i> Start Date
-                             </label>
-                             <input type="text" id="startDate" class="form-control" placeholder="Select start date" required>
-                         </div>
-
-                         <!-- End Date -->
-                         <div class="mb-3">
-                             <label for="endDate" class="form-label">
-                                 <i class="fas fa-calendar-day"></i> End Date
-                             </label>
-                             <input type="text" id="endDate" class="form-control" placeholder="Select end date" required>
-                         </div>
 
                         <!-- Operator Selection -->
                         <div class="mb-3">
@@ -352,16 +488,15 @@
                              </select>
                          </div>
 
-                         <div class="row mb-3">
-                              <div class="col-md-6">
-                                  <label for="editStartDate" class="form-label">Start Date</label>
-                                  <input type="text" id="editStartDate" class="form-control" placeholder="Select start date" required>
-                              </div>
-                              <div class="col-md-6">
-                                  <label for="editEndDate" class="form-label">End Date</label>
-                                  <input type="text" id="editEndDate" class="form-control" placeholder="Select end date" required>
-                              </div>
-                          </div>
+                         <div class="mb-3">
+                             <label for="editDate" class="form-label">Date</label>
+                             <input type="text" id="editDate" class="form-control" placeholder="yyyy-MM-dd" required>
+                         </div>
+
+                         <div class="mb-3">
+                             <label for="editStation" class="form-label">Refueling Station</label>
+                             <input type="text" id="editStation" class="form-control" placeholder="Enter refueling station name" required>
+                         </div>
 
                          <div class="row mb-3">
                              <div class="col-md-6">
@@ -456,9 +591,23 @@
                 </div>
                 <div class="modal-body">
                     <div class="chart-container">
+                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Monthly Consumption Trend</h6>
+                        <canvas id="monthlyTrendChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Fuel Distribution by Equipment</h6>
+                        <canvas id="equipmentPieChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Consumption by Operator</h6>
+                        <canvas id="operatorBarChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Consumption Rate by Entry</h6>
                         <canvas id="consumptionChart"></canvas>
                     </div>
                     <div class="chart-container">
+                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Liters Used by Entry</h6>
                         <canvas id="litersChart"></canvas>
                     </div>
                 </div>
@@ -493,10 +642,27 @@
         </button>
     </div>
 
+    <!-- Bottom Navigation Menu (Mobile) -->
+    <nav class="bottom-nav">
+        <button class="bottom-nav-item" onclick="openNewEntryModal()" title="New Entry">
+            <i class="fas fa-plus"></i>
+            <span>New Entry</span>
+        </button>
+        <button class="bottom-nav-item" onclick="openExportPanel()" title="Export Report">
+            <i class="fas fa-download"></i>
+            <span>Export</span>
+        </button>
+        <button class="bottom-nav-item" onclick="toggleTheme()" title="Toggle Theme">
+            <i class="fas fa-moon" id="themeIconMobile"></i>
+            <span>Theme</span>
+        </button>
+    </nav>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom Scripts -->
+    <script src="assets/js/db.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>
