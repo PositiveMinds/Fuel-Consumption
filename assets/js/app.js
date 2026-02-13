@@ -299,17 +299,45 @@ window.addEventListener("beforeinstallprompt", (e) => {
 // Handle app installation
 function installApp() {
     if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === "accepted") {
-                console.log("App installed");
-                // Hide install button after installation
-                const installBtn = document.getElementById("installBtn");
-                if (installBtn) {
-                    installBtn.style.display = "none";
-                }
+        // Show custom popup instead of browser prompt
+        Swal.fire({
+            title: "Install Fleet Manager",
+            html: `
+                <div style="text-align: left; line-height: 1.8;">
+                    <p>Install the Fleet Manager app to your home screen for quick access and offline functionality.</p>
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 0.9em;">
+                        <p style="margin: 5px 0;"><strong>✓</strong> Quick access from home screen</p>
+                        <p style="margin: 5px 0;"><strong>✓</strong> Work offline</p>
+                        <p style="margin: 5px 0;"><strong>✓</strong> Full screen experience</p>
+                    </div>
+                </div>
+            `,
+            icon: "info",
+            iconColor: "#F54927",
+            showCancelButton: true,
+            confirmButtonText: "Install Now",
+            cancelButtonText: "Not Now",
+            confirmButtonColor: "#F54927",
+            cancelButtonColor: "#6c757d",
+            customClass: {
+                popup: "install-modal-popup"
             }
-            deferredPrompt = null;
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === "accepted") {
+                        console.log("App installed");
+                        Swal.fire("Success!", "App installed successfully!", "success");
+                        // Hide install button after installation
+                        const installBtn = document.getElementById("installBtn");
+                        if (installBtn) {
+                            installBtn.style.display = "none";
+                        }
+                    }
+                    deferredPrompt = null;
+                });
+            }
         });
     }
 }
