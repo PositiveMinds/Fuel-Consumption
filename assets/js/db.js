@@ -295,6 +295,15 @@ class DatabaseManager {
         }
 
         try {
+            // Close the current database connection
+            if (this.db) {
+                this.db.close();
+                this.db = null;
+            }
+
+            // Reinitialize the database to get a fresh connection
+            await this.init();
+
             // Clear existing data
             await this.clearAllFuelEntries();
 

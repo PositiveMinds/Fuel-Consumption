@@ -102,34 +102,47 @@ input, textarea, select {
     user-select: text;
 }
 
-html, body {
-    position: fixed;
+html {
     width: 100%;
     height: 100%;
     overflow: hidden;
 }
 
 body {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
     background: var(--bg-primary);
     color: var(--text-primary);
     padding: 0;
     margin: 0;
-    padding-top: max(0px, env(safe-area-inset-top));
-    padding-right: max(0px, env(safe-area-inset-right));
-    padding-bottom: max(0px, env(safe-area-inset-bottom));
-    padding-left: max(0px, env(safe-area-inset-left));
 }
 
 .navbar {
     background: var(--bg-secondary);
     box-shadow: 0 2px 10px var(--shadow-color);
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .container-fluid {
     width: 100%;
-    margin: 0;
     padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
 }
 
 .navbar-brand {
@@ -140,8 +153,14 @@ body {
 
 .container-main {
     max-width: 1200px;
-    padding-top: 20px;
+    padding-top: 80px;
     padding-bottom: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
 }
 
 .card {
@@ -190,6 +209,8 @@ body {
 .stats-card .stat-icon {
     font-size: 2.5rem;
     margin-bottom: 10px;
+    color: var(--primary-color);
+    display: block;
 }
 
 .stats-card .stat-value {
@@ -1274,82 +1295,146 @@ body {
     }
 }
 
-.fab-menu {
+.fab-menu-card {
     position: fixed;
-    bottom: 110px;
-    right: 30px;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    max-width: 380px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    box-shadow: -4px 0 20px var(--shadow-color);
+    z-index: 998;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    z-index: 998;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
 }
 
-.fab-menu button {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: none;
-    color: white;
+.fab-menu-card.active {
+    width: 100%;
+}
+
+.fab-menu-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.fab-menu-title {
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-primary);
     font-size: 1.2rem;
+}
+
+.fab-menu-close {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-    opacity: 0;
-    transform: translateY(20px) scale(0.8);
-}
-
-.fab-menu.active button {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
-
-.fab-menu button:nth-child(1) {
-    transition-delay: 0.1s;
-    background: var(--primary-color);
-}
-
-.fab-menu button:nth-child(2) {
-    transition-delay: 0.15s;
-    background: var(--success-color);
-}
-
-.fab-menu button:nth-child(3) {
-    transition-delay: 0.2s;
-    background: var(--warning-color);
-}
-
-.fab-menu button:nth-child(4) {
-    transition-delay: 0.25s;
-    background: var(--danger-color);
-}
-
-.fab-menu button:hover {
-    transform: translateY(0) scale(1.15) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-}
-
-.fab-label {
-    position: absolute;
-    right: 80px;
-    background: var(--bg-secondary);
-    padding: 8px 12px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.fab-menu-close:hover {
+    background: rgba(245, 73, 39, 0.1);
+    color: var(--primary-color);
+}
+
+.fab-menu-content {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fab-menu-item {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--bg-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.25s ease;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.fab-menu-item:hover {
+    background: rgba(245, 73, 39, 0.15);
+    transform: translateX(-4px);
+    box-shadow: 0 2px 12px var(--shadow-color);
+}
+
+.fab-menu-item:active {
+    transform: translateX(-2px);
+}
+
+.fab-item-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    background: var(--primary-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.fab-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.fab-item-title {
     font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    border: 1px solid var(--border-color);
+    display: block;
+    font-size: 1rem;
 }
 
-.fab-menu button:hover .fab-label {
-    opacity: 1;
+.fab-item-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: block;
+}
+
+/* Backdrop overlay for slide-in menu */
+.fab-menu-card::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    transition: background 0.35s ease;
+    z-index: -1;
+}
+
+.fab-menu-card.active::before {
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
 }
 
 /* Dark Theme Disabled Text */
@@ -1547,6 +1632,11 @@ body {
      flex: 1;
 }
 
+.modal-body .input-group-text {
+     white-space: nowrap;
+     flex-shrink: 0;
+}
+
 /* Air Datepicker Custom Styling */
 .air-datepicker {
     background: var(--bg-secondary) !important;
@@ -1601,6 +1691,74 @@ body {
 
 [data-theme="dark"] .air-datepicker-nav--action {
     color: white !important;
+}
+
+/* Notification Settings Modal - Viewport-aware sizing */
+#notificationSettingsModal .modal-dialog {
+    max-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fix dropdown appearance in notification modal */
+#notificationSettingsModal #notificationSound {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+/* Remove default select styling */
+#notificationSettingsModal #notificationSound option {
+    background-color: white;
+    color: black;
+}
+
+#notificationSettingsModal #notificationSound option:checked {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+#notificationSettingsModal .modal-content {
+    max-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+}
+
+#notificationSettingsModal .modal-body {
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    flex: 1;
+}
+
+#notificationSettingsModal .modal-header {
+    flex-shrink: 0;
+}
+
+#notificationSettingsModal .modal-footer {
+    flex-shrink: 0;
+}
+
+/* Ensure modal is centered and responsive */
+@media (max-height: 600px) {
+    #notificationSettingsModal .modal-body {
+        max-height: calc(100vh - 180px);
+    }
+}
+
+@media (max-height: 500px) {
+    #notificationSettingsModal .modal-dialog {
+        margin: 10px;
+    }
+
+    #notificationSettingsModal .modal-body {
+        max-height: calc(100vh - 150px);
+    }
 }
 
  /* Bottom Navigation Menu */
@@ -1819,6 +1977,11 @@ body {
      font-size: 16px; /* Prevents zoom on iOS */
      border-radius: 8px;
      padding: 12px;
+ }
+
+ /* Capitalize input fields */
+ .capitalize-input {
+     text-transform: uppercase;
  }
 
  /* Smooth scrolling for mobile */

@@ -91,14 +91,14 @@
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" id="installBtn" onclick="installApp()" title="Install App" style="display: none;">
                     <i class="fas fa-download"></i> Install
                 </button>
-                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" id="notificationBtn" onclick="requestNotificationPermission()" title="Enable Notifications">
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" id="notificationBtn" onclick="openNotificationSettings()" title="Notification Settings">
                     <i class="fas fa-bell"></i>
                 </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openNewEntryModal()">
                     <i class="fas fa-plus"></i> New Entry
                 </button>
-                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openExportPanel()" title="Export Report">
-                    <i class="fas fa-download"></i> Export
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openExportPanel()" title="Settings & Reports">
+                    <i class="fas fa-cog"></i> Settings
                 </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="toggleTheme()" title="Toggle Theme">
                     <i class="fas fa-moon" id="themeIcon"></i>
@@ -258,6 +258,41 @@
                 </button>
             </div>
 
+            <!-- Share Options -->
+            <div class="export-options" style="margin-top: 30px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-share-alt"></i> Share Report
+                </h6>
+
+                <!-- Share PDF -->
+                <button class="export-option-btn" onclick="sharePDFReport()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-share-nodes"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Share PDF Report</div>
+                        <div class="export-option-desc">Share via email, messaging, or cloud</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+
+                <!-- Share Excel -->
+                <button class="export-option-btn" onclick="shareExcelReport()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-share-nodes"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Share Excel Report</div>
+                        <div class="export-option-desc">Share spreadsheet via your preferred app</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+
             <!-- Backup Options -->
             <div class="export-options" style="margin-top: 30px;">
                 <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
@@ -313,106 +348,106 @@
                             <label for="site" class="form-label">
                                 <i class="fas fa-map-marker-alt"></i> Site
                             </label>
-                            <input type="text" id="site" class="form-control" placeholder="Enter site name" required>
-                        </div>
+                            <input type="text" id="site" class="form-control capitalize-input" placeholder="Enter Site Name" required>
+                         </div>
 
-                        <!-- Period (Quarterly) -->
+                         <!-- Period (Quarterly) -->
+                          <div class="mb-3">
+                              <label for="quarter" class="form-label">
+                                  <i class="fas fa-calendar-alt"></i> Period (Quarterly)
+                              </label>
+                              <select id="quarter" class="form-control" required>
+                                  <option value="">-- Select Quarter --</option>
+                                  <option value="Q1">Q1 (January - March)</option>
+                                  <option value="Q2">Q2 (April - June)</option>
+                                  <option value="Q3">Q3 (July - September)</option>
+                                  <option value="Q4">Q4 (October - December)</option>
+                              </select>
+                          </div>
+
+                         <!-- Year -->
+                          <div class="mb-3">
+                              <label for="year" class="form-label">
+                                  <i class="fas fa-calendar"></i> Year
+                              </label>
+                              <input type="number" id="year" class="form-control" placeholder="Enter Year (e.g., 2025)" required min="2020" max="2100" readonly>
+                          </div>
+
+                         <!-- Date -->
+                          <div class="mb-3">
+                              <label for="date" class="form-label">
+                                  <i class="fas fa-calendar-day"></i> Date
+                              </label>
+                              <input type="text" id="date" class="form-control" placeholder="YYYY-MM-DD" required>
+                          </div>
+
+                         <!-- Refueling Station -->
                          <div class="mb-3">
-                             <label for="quarter" class="form-label">
-                                 <i class="fas fa-calendar-alt"></i> Period (Quarterly)
+                             <label for="station" class="form-label">
+                                 <i class="fas fa-gas-pump"></i> Refueling Station
                              </label>
-                             <select id="quarter" class="form-control" required>
-                                 <option value="">-- Select Quarter --</option>
-                                 <option value="Q1">Q1 (January - March)</option>
-                                 <option value="Q2">Q2 (April - June)</option>
-                                 <option value="Q3">Q3 (July - September)</option>
-                                 <option value="Q4">Q4 (October - December)</option>
+                             <input type="text" id="station" class="form-control capitalize-input" placeholder="Enter Refueling Station Name" required>
+                         </div>
+
+                         <!-- Operator Selection -->
+                         <div class="mb-3">
+                             <label for="operator" class="form-label">
+                                 <i class="fas fa-user-circle"></i> Operator (Responsible Person)
+                             </label>
+                             <div class="input-group">
+                                 <select id="operator" class="form-select" required>
+                                     <option value="">-- Select Operator --</option>
+                                     <option value="Bwoye Charles">Bwoye Charles</option>
+                                     <option value="other">Other (Enter Name)</option>
+                                 </select>
+                             </div>
+                             <input type="text" id="customOperator" class="form-control mt-2 capitalize-input" placeholder="Enter Operator's Name" style="display: none;">
+                         </div>
+
+                         <!-- Equipment/Machinery Selection -->
+                         <div class="mb-3">
+                             <label for="equipment" class="form-label">
+                                 <i class="fas fa-cog"></i> Equipment / Machinery
+                             </label>
+                             <select id="equipment" class="form-select" required>
+                                 <option value="">-- Select Equipment --</option>
+                                 <option value="Vehicle">Vehicle</option>
+                                 <option value="Motorbike">Motorbike</option>
+                                 <option value="Generator">Generator</option>
                              </select>
                          </div>
 
-                        <!-- Year -->
-                         <div class="mb-3">
-                             <label for="year" class="form-label">
-                                 <i class="fas fa-calendar"></i> Year
-                             </label>
-                             <input type="number" id="year" class="form-control" placeholder="Enter year (e.g., 2025)" required min="2020" max="2100" readonly>
+                         <!-- Time Selection -->
+                         <div class="row mb-3">
+                             <div class="col-md-6">
+                                 <label for="startTime" class="form-label">
+                                     <i class="fas fa-play-circle"></i> Start Time
+                                 </label>
+                                 <input type="text" id="startTime" class="form-control timepicker" placeholder="HH:MM" required>
+                             </div>
+                             <div class="col-md-6">
+                                 <label for="endTime" class="form-label">
+                                     <i class="fas fa-stop-circle"></i> End Time
+                                 </label>
+                                 <input type="text" id="endTime" class="form-control timepicker" placeholder="HH:MM" required>
+                             </div>
                          </div>
 
-                        <!-- Date -->
-                         <div class="mb-3">
-                             <label for="date" class="form-label">
-                                 <i class="fas fa-calendar-day"></i> Date
+                         <!-- Distance Input (For Vehicle/Motorbike) -->
+                         <div class="mb-3" id="distanceGroup" style="display: none;">
+                             <label for="distance" class="form-label">
+                                 <i class="fas fa-road"></i> Distance Covered
                              </label>
-                             <input type="text" id="date" class="form-control" placeholder="yyyy-MM-dd" required>
+                             <div class="input-group">
+                                 <input type="number" id="distance" class="form-control" placeholder="Enter Distance" min="0" step="0.1">
+                                 <span class="input-group-text">km</span>
+                             </div>
                          </div>
 
-                        <!-- Refueling Station -->
-                        <div class="mb-3">
-                            <label for="station" class="form-label">
-                                <i class="fas fa-gas-pump"></i> Refueling Station
-                            </label>
-                            <input type="text" id="station" class="form-control" placeholder="Enter refueling station name" required>
-                        </div>
-
-                        <!-- Operator Selection -->
-                        <div class="mb-3">
-                            <label for="operator" class="form-label">
-                                <i class="fas fa-user-circle"></i> Operator (Responsible Person)
-                            </label>
-                            <div class="input-group">
-                                <select id="operator" class="form-select" required>
-                                    <option value="">-- Select Operator --</option>
-                                    <option value="Bwoye Charles">Bwoye Charles</option>
-                                    <option value="other">Other (Enter Name)</option>
-                                </select>
-                            </div>
-                            <input type="text" id="customOperator" class="form-control mt-2" placeholder="Enter operator's name" style="display: none;">
-                        </div>
-
-                        <!-- Equipment/Machinery Selection -->
-                        <div class="mb-3">
-                            <label for="equipment" class="form-label">
-                                <i class="fas fa-cog"></i> Equipment / Machinery
-                            </label>
-                            <select id="equipment" class="form-select" required>
-                                <option value="">-- Select Equipment --</option>
-                                <option value="Vehicle">Vehicle</option>
-                                <option value="Motorbike">Motorbike</option>
-                                <option value="Generator">Generator</option>
-                            </select>
-                        </div>
-
-                        <!-- Time Selection -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="startTime" class="form-label">
-                                    <i class="fas fa-play-circle"></i> Start Time
-                                </label>
-                                <input type="text" id="startTime" class="form-control timepicker" placeholder="HH:MM" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="endTime" class="form-label">
-                                    <i class="fas fa-stop-circle"></i> End Time
-                                </label>
-                                <input type="text" id="endTime" class="form-control timepicker" placeholder="HH:MM" required>
-                            </div>
-                        </div>
-
-                        <!-- Distance Input (For Vehicle/Motorbike) -->
-                        <div class="mb-3" id="distanceGroup" style="display: none;">
-                            <label for="distance" class="form-label">
-                                <i class="fas fa-road"></i> Distance Covered
-                            </label>
-                            <div class="input-group">
-                                <input type="number" id="distance" class="form-control" placeholder="Enter distance" min="0" step="0.1">
-                                <span class="input-group-text">km</span>
-                            </div>
-                        </div>
-
-                        <!-- Liters Input -->
-                        <div class="mb-4">
-                            <label for="liters" class="form-label">
-                                <i class="fas fa-droplet"></i> Liters Used
+                         <!-- Liters Input -->
+                         <div class="mb-4">
+                             <label for="liters" class="form-label">
+                                 <i class="fas fa-droplet"></i> Liters Used
                             </label>
                             <div class="input-group">
                                 <input type="number" id="liters" class="form-control" placeholder="Enter amount" min="0" step="0.01" required>
@@ -581,41 +616,212 @@
 
     <!-- Chart Modal -->
     <div class="modal fade" id="chartModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-chart-line"></i> Fuel Consumption Analytics
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="chart-container">
-                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Monthly Consumption Trend</h6>
-                        <canvas id="monthlyTrendChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Fuel Distribution by Equipment</h6>
-                        <canvas id="equipmentPieChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Consumption by Operator</h6>
-                        <canvas id="operatorBarChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Consumption Rate by Entry</h6>
-                        <canvas id="consumptionChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Liters Used by Entry</h6>
-                        <canvas id="litersChart"></canvas>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
+       <div class="modal-dialog modal-lg">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h5 class="modal-title">
+                       <i class="fas fa-chart-line"></i> Fuel Consumption Analytics
+                   </h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               </div>
+               <div class="modal-body">
+                   <div class="chart-container">
+                       <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Monthly Consumption Trend</h6>
+                       <canvas id="monthlyTrendChart"></canvas>
+                   </div>
+                   <div class="chart-container">
+                       <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Fuel Distribution by Equipment</h6>
+                       <canvas id="equipmentPieChart"></canvas>
+                   </div>
+                   <div class="chart-container">
+                       <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Consumption by Operator</h6>
+                       <canvas id="operatorBarChart"></canvas>
+                   </div>
+                   <div class="chart-container">
+                       <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Consumption Rate by Entry</h6>
+                       <canvas id="consumptionChart"></canvas>
+                   </div>
+                   <div class="chart-container">
+                       <h6 style="text-align: center; margin-bottom: 15px; color: var(--text-primary); font-weight: 600;">Liters Used by Entry</h6>
+                       <canvas id="litersChart"></canvas>
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               </div>
+           </div>
+       </div>
+    </div>
+
+    <!-- Notification Settings Modal -->
+    <div class="modal fade" id="notificationSettingsModal" tabindex="-1">
+       <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h5 class="modal-title">
+                       <i class="fas fa-bell"></i> Notification Settings
+                   </h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               </div>
+               <div class="modal-body">
+                   <!-- Push Notifications Enabled Toggle -->
+                   <div class="mb-4">
+                       <div class="d-flex justify-content-between align-items-center mb-2">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-bell"></i> Enable Push Notifications
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="pushNotificationsEnabledToggle" onchange="savePushNotificationSettings()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Receive real browser notifications even when the app is closed</small>
+                   </div>
+
+                   <hr>
+
+                   <!-- Notifications Enabled Toggle -->
+                   <div class="mb-4">
+                       <div class="d-flex justify-content-between align-items-center mb-2">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-bell"></i> Enable In-App Notifications
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="notificationsEnabledToggle" onchange="handleNotificationsToggle()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Receive notifications while using the app</small>
+                   </div>
+
+                   <hr>
+
+                   <!-- Notification Types -->
+                   <h6 style="color: var(--text-primary); font-weight: 600; margin-bottom: 15px;">Notification Types</h6>
+
+                   <div class="mb-3">
+                       <div class="d-flex justify-content-between align-items-center">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-plus-circle"></i> New Entry Added
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="notifyNewEntry" onchange="saveNotificationSettings()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Notify when a new fuel entry is added</small>
+                   </div>
+
+                   <div class="mb-3">
+                       <div class="d-flex justify-content-between align-items-center">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-pencil-alt"></i> Entry Edited
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="notifyEditEntry" onchange="saveNotificationSettings()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Notify when an entry is modified</small>
+                   </div>
+
+                   <div class="mb-3">
+                       <div class="d-flex justify-content-between align-items-center">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-trash"></i> Entry Deleted
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="notifyDeleteEntry" onchange="saveNotificationSettings()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Notify when an entry is deleted</small>
+                   </div>
+
+                   <div class="mb-3">
+                       <div class="d-flex justify-content-between align-items-center">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-chart-line"></i> Daily Summary
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="notifyDailySummary" onchange="saveNotificationSettings()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Receive daily consumption summary</small>
+                   </div>
+
+                   <hr>
+
+                   <!-- Notification Sound -->
+                   <div class="mb-3">
+                       <label class="form-label">
+                           <i class="fas fa-volume-up"></i> Sound
+                       </label>
+                       <select id="notificationSound" class="form-select" onchange="saveNotificationSettings()">
+                           <option value="default">Default</option>
+                           <option value="bell">Bell</option>
+                           <option value="chime">Chime</option>
+                           <option value="alert">Alert</option>
+                           <option value="silent">Silent</option>
+                       </select>
+                       <small class="text-muted">Choose notification sound</small>
+                   </div>
+
+                   <!-- Vibration Pattern -->
+                   <div class="mb-3">
+                       <div class="d-flex justify-content-between align-items-center">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-mobile-alt"></i> Vibration
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="notificationVibration" checked onchange="saveNotificationSettings()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Enable vibration feedback</small>
+                   </div>
+
+                   <!-- Quiet Hours -->
+                   <hr>
+
+                   <h6 style="color: var(--text-primary); font-weight: 600; margin-bottom: 15px;">Quiet Hours</h6>
+
+                   <div class="mb-3">
+                       <div class="d-flex justify-content-between align-items-center mb-2">
+                           <label class="form-label mb-0">
+                               <i class="fas fa-moon"></i> Enable Quiet Hours
+                           </label>
+                           <div class="form-check form-switch">
+                               <input class="form-check-input" type="checkbox" id="quietHoursEnabled" onchange="toggleQuietHoursInputs()">
+                           </div>
+                       </div>
+                       <small class="text-muted">Disable notifications during specified times</small>
+                   </div>
+
+                   <div id="quietHoursInputs" style="display: none;">
+                       <div class="row">
+                           <div class="col-md-6 mb-3">
+                               <label for="quietHoursStart" class="form-label">Start Time</label>
+                               <input type="time" id="quietHoursStart" class="form-control" onchange="saveNotificationSettings()">
+                           </div>
+                           <div class="col-md-6 mb-3">
+                               <label for="quietHoursEnd" class="form-label">End Time</label>
+                               <input type="time" id="quietHoursEnd" class="form-control" onchange="saveNotificationSettings()">
+                           </div>
+                       </div>
+                   </div>
+
+                   <hr>
+
+                   <!-- Test Notifications -->
+                   <div class="d-grid gap-2">
+                       <button type="button" class="btn btn-primary" onclick="testPushNotification()">
+                           <i class="fas fa-paper-plane"></i> Test Push Notification
+                       </button>
+                       <button type="button" class="btn btn-outline-primary" onclick="testNotification()">
+                           <i class="fas fa-paper-plane"></i> Test In-App Notification
+                       </button>
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               </div>
+           </div>
+       </div>
     </div>
 
     <!-- FAB Button Menu -->
@@ -623,23 +829,44 @@
         <i class="fas fa-plus"></i>
     </button>
 
-    <div class="fab-menu" id="fabMenu">
-        <button onclick="showSummaryModal()" title="View Summary">
-            <i class="fas fa-chart-pie"></i>
-            <span class="fab-label">Summary</span>
-        </button>
-        <button onclick="exportData()" title="Export CSV">
-            <i class="fas fa-download"></i>
-            <span class="fab-label">Export CSV</span>
-        </button>
-        <button onclick="showChart()" title="View Chart">
-            <i class="fas fa-chart-bar"></i>
-            <span class="fab-label">View Chart</span>
-        </button>
-        <button onclick="confirmClearHistory()" title="Clear All">
-            <i class="fas fa-trash"></i>
-            <span class="fab-label">Clear All</span>
-        </button>
+    <!-- FAB Slide-in Card Menu -->
+    <div class="fab-menu-card" id="fabMenu">
+        <div class="fab-menu-header">
+            <h6 class="fab-menu-title">Quick Actions</h6>
+            <button class="fab-menu-close" onclick="toggleFabMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="fab-menu-content">
+            <button class="fab-menu-item" onclick="showSummaryModal()" title="View Summary">
+                <span class="fab-item-icon"><i class="fas fa-chart-pie"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">Summary</span>
+                    <span class="fab-item-desc">View data overview</span>
+                </span>
+            </button>
+            <button class="fab-menu-item" onclick="exportData()" title="Export CSV">
+                <span class="fab-item-icon"><i class="fas fa-download"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">Export CSV</span>
+                    <span class="fab-item-desc">Download as CSV</span>
+                </span>
+            </button>
+            <button class="fab-menu-item" onclick="showChart()" title="View Chart">
+                <span class="fab-item-icon"><i class="fas fa-chart-bar"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">View Chart</span>
+                    <span class="fab-item-desc">Analytics & trends</span>
+                </span>
+            </button>
+            <button class="fab-menu-item" onclick="confirmClearHistory()" title="Clear All">
+                <span class="fab-item-icon"><i class="fas fa-trash"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">Clear All</span>
+                    <span class="fab-item-desc">Remove all entries</span>
+                </span>
+            </button>
+        </div>
     </div>
 
     <!-- Bottom Navigation Menu (Mobile) -->
@@ -648,9 +875,13 @@
             <i class="fas fa-plus"></i>
             <span>New Entry</span>
         </button>
-        <button class="bottom-nav-item" onclick="openExportPanel()" title="Export Report">
-            <i class="fas fa-download"></i>
-            <span>Export</span>
+        <button class="bottom-nav-item" onclick="openNotificationSettings()" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span>Notifications</span>
+        </button>
+        <button class="bottom-nav-item" onclick="openExportPanel()" title="Settings & Reports">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
         </button>
         <button class="bottom-nav-item" onclick="toggleTheme()" title="Toggle Theme">
             <i class="fas fa-moon" id="themeIconMobile"></i>
@@ -663,6 +894,7 @@
 
     <!-- Custom Scripts -->
     <script src="assets/js/db.js"></script>
+    <script src="assets/js/push-notifications.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>

@@ -104,6 +104,30 @@ async function syncData() {
   }
 }
 
+// Handle messages from the app
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const options = event.data.options || {};
+    const title = event.data.title || 'Fleet Manager';
+    
+    // Add default notification properties
+    const notificationOptions = {
+      icon: '/assets/images/logo-192x192.png',
+      badge: '/assets/images/logo-144x144.png',
+      tag: 'fleet-manager-notification',
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+      ...options,
+      data: {
+        dateOfArrival: Date.now(),
+        ...options.data
+      }
+    };
+
+    self.registration.showNotification(title, notificationOptions);
+  }
+});
+
 // Handle push notifications
 self.addEventListener('push', event => {
   let notificationData = {
@@ -122,7 +146,11 @@ self.addEventListener('push', event => {
 
   if (event.data) {
     try {
-      notificationData = event.data.json();
+      const data = event.data.json();
+      notificationData = {
+        ...notificationData,
+        ...data
+      };
     } catch (e) {
       notificationData.body = event.data.text();
     }
@@ -135,7 +163,10 @@ self.addEventListener('push', event => {
 
 // Handle notification clicks
 self.addEventListener('notificationclick', event => {
-  event.notification.close();
+  const notification = event.notification;
+  const data = notification.data || {};
+  
+  notification.close();
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
@@ -143,12 +174,25 @@ self.addEventListener('notificationclick', event => {
         // Check if app is already open
         for (let client of clientList) {
           if (client.url === '/' && 'focus' in client) {
+            // Send message to the focused client about the notification action
+            client.postMessage({
+              type: 'NOTIFICATION_CLICKED',
+              data: data
+            });
             return client.focus();
           }
         }
         // If not open, open it
         if (clients.openWindow) {
-          return clients.openWindow('/');
+          return clients.openWindow('/').then(client => {
+            if (client) {
+              client.postMessage({
+                type: 'NOTIFICATION_CLICKED',
+                data: data
+              });
+            }
+            return client;
+          });
         }
       })
   );
