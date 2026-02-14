@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Create Google Sheets config with secrets
+        run: |
+          cat > assets/js/google-sheets-sync.config.js << 'EOF'
+          // Google Sheets API Configuration
+          // Auto-generated from GitHub Secrets
+          
+          const GOOGLE_CONFIG = {
+              CLIENT_ID: '${{ secrets.GOOGLE_CLIENT_ID }}',
+              API_KEY: '${{ secrets.GOOGLE_API_KEY }}',
+              SCOPES: ['https://www.googleapis.com/auth/spreadsheets'],
+              DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+          };
+          
+          console.log('Google Sheets configuration loaded');
+          EOF
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '.'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
