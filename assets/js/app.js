@@ -321,8 +321,12 @@ function initMobileOptimizations() {
 // PWA Service Worker Registration
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
+    // Detect if running on GitHub Pages subdirectory
+    const basePath = window.location.pathname.includes('/Fuel-Consumption/') ? '/Fuel-Consumption' : '';
+    const swPath = basePath + '/sw.js';
+    
     navigator.serviceWorker
-      .register("/sw.js")
+      .register(swPath, { scope: basePath + '/' })
       .then((registration) => {
         console.log("Service Worker registered:", registration);
       })
