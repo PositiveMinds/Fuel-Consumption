@@ -120,6 +120,9 @@
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openNewEntryModal()">
                     <i class="fas fa-plus"></i> New Entry
                 </button>
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openFeaturesPanel()" title="Fleet Features">
+                    <i class="fas fa-star"></i> Features
+                </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openExportPanel()" title="Settings & Reports">
                     <i class="fas fa-cog"></i> Settings
                 </button>
@@ -227,6 +230,172 @@
 
     <!-- Hidden PDF Document Container -->
     <div id="pdfContent" style="display: none;"></div>
+
+    <!-- Features Panel Overlay -->
+    <div id="featuresOverlay" class="export-overlay" onclick="closeFeaturesPa​nel()"></div>
+
+    <!-- Features Slide-in Panel -->
+    <div id="featuresPanel" class="export-panel">
+        <div class="export-panel-header">
+            <h5 class="export-panel-title">
+                <i class="fas fa-star"></i> Fleet Features
+            </h5>
+            <button class="export-panel-close" onclick="closeFeaturesPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="export-panel-body">
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                <i class="fas fa-lightbulb"></i> Advanced fleet management tools for tracking vehicles, photos, maintenance, and more.
+            </p>
+
+            <!-- Vehicle Management -->
+            <div class="export-options">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-car"></i> Vehicle Management
+                </h6>
+
+                <button class="export-option-btn" onclick="showVehicleSelector()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Select Vehicle</div>
+                        <div class="export-option-desc">Switch between tracked vehicles</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+
+                <button class="export-option-btn" onclick="showNewVehicleModal()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Add New Vehicle</div>
+                        <div class="export-option-desc">Create vehicle profile with specs</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Photos & Documentation -->
+            <div class="export-options" style="margin-top: 30px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-camera"></i> Photos & Documentation
+                </h6>
+
+                <button class="export-option-btn" onclick="closeFeaturesPanel(); openNewEntryModal()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Add Fuel Entry with Photo</div>
+                        <div class="export-option-desc">Attach receipt or gauge photos to Drive</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Maintenance & Service -->
+            <div class="export-options" style="margin-top: 30px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-tools"></i> Maintenance & Service
+                </h6>
+
+                <button class="export-option-btn" onclick="showMaintenanceReminder()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Add Maintenance Reminder</div>
+                        <div class="export-option-desc">Schedule oil change, inspection, etc.</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Fuel Tracking -->
+            <div class="export-options" style="margin-top: 30px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-gas-pump"></i> Fuel Tracking
+                </h6>
+
+                <button class="export-option-btn" onclick="recordFuelPrice()">
+                    <div class="export-option-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Record Fuel Price</div>
+                        <div class="export-option-desc">Track historical price trends</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- QR & Location -->
+            <div class="export-options" style="margin-top: 30px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-qrcode"></i> QR & Location
+                </h6>
+
+                <button class="export-option-btn" onclick="Swal.fire('Info', 'Open an entry and click the QR icon to generate QR code', 'info')">
+                    <div class="export-option-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Generate QR Codes</div>
+                        <div class="export-option-desc">Create QR for entries and vehicles</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+
+                <button class="export-option-btn" onclick="Swal.fire('Info', 'Location capture available when adding fuel entries', 'info')">
+                    <div class="export-option-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Location Tracking</div>
+                        <div class="export-option-desc">Save GPS coordinates with entries</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Help & Documentation -->
+            <div class="export-options" style="margin-top: 30px; margin-bottom: 20px;">
+                <h6 style="color: var(--text-primary); font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-question-circle"></i> Help & Documentation
+                </h6>
+
+                <button class="export-option-btn" onclick="Swal.fire({title: 'Fleet Features', html: '<p><strong>Multi-Vehicle Tracking:</strong> Create vehicle profiles and track fuel separately.<br><strong>Photos:</strong> Upload receipts to Google Drive.<br><strong>Maintenance:</strong> Track service tasks and reminders.<br><strong>Fuel Price:</strong> Record and analyze price trends.<br><strong>QR Codes:</strong> Generate shareable QR codes.<br><strong>Location:</strong> Save GPS coordinates with entries.</p>', confirmButtonColor: '#F54927'})">
+                    <div class="export-option-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Feature Guide</div>
+                        <div class="export-option-desc">Learn about available features</div>
+                    </div>
+                    <div class="export-option-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Export Panel Overlay -->
     <div id="exportOverlay" class="export-overlay" onclick="closeExportPanel()"></div>
@@ -514,14 +683,14 @@
     </div>
 
     <!-- New Entry Modal -->
-    <div class="modal fade" id="newEntryModal" tabindex="-1">
+    <div class="modal fade" id="newEntryModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content modal-content-adaptive">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fas fa-plus-circle"></i> New Fuel Entry
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="resetNewEntryForm()"></button>
                 </div>
                 <div class="modal-body">
                     <form id="fuelForm">
@@ -637,6 +806,42 @@
                             </div>
                         </div>
 
+                        <!-- Photo Upload Section -->
+                        <div class="mb-4 p-3" style="background: var(--bg-secondary); border-radius: 8px; border: 2px dashed var(--border-color);">
+                            <label class="form-label">
+                                <i class="fas fa-camera"></i> Attach Photos (Optional)
+                            </label>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 10px;">
+                                Upload receipts, gauge photos, or documentation to Google Drive
+                            </p>
+                            <div class="input-group">
+                                <input type="file" id="photoInput" class="form-control" accept="image/*" multiple style="display: none;">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="document.getElementById('photoInput').click()">
+                                    <i class="fas fa-plus"></i> Add Photos
+                                </button>
+                            </div>
+                            <div id="photoPreview" style="margin-top: 10px; display: none;">
+                                <small style="color: var(--text-secondary); display: block; margin-bottom: 8px;">Selected: <span id="photoCount">0</span> file(s)</small>
+                                <div id="photoThumbnails" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Location Capture Section -->
+                        <div class="mb-4 p-3" style="background: var(--bg-secondary); border-radius: 8px;">
+                            <label class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Location (Optional)
+                            </label>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 10px;">
+                                Capture GPS coordinates with this entry
+                            </p>
+                            <button type="button" class="btn btn-outline-primary w-100" id="captureLocationBtn" onclick="captureLocationForEntry()">
+                                <i class="fas fa-location-arrow"></i> Capture Location
+                            </button>
+                            <small id="locationStatus" style="display: none; margin-top: 5px; color: var(--success-color); display: block;">
+                                <i class="fas fa-check-circle"></i> Location captured
+                            </small>
+                        </div>
+
                         <!-- Result Display (inside modal) -->
                         <div id="resultBox" style="display: none;">
                             <div class="result-box">
@@ -670,7 +875,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="resetNewEntryForm()">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="calculateConsumption()">
                         <i class="fas fa-calculator"></i> Calculate & Save
                     </button>
@@ -1027,11 +1232,25 @@
                     <span class="fab-item-desc">View data overview</span>
                 </span>
             </button>
-            <button class="fab-menu-item" onclick="exportData()" title="Export CSV">
-                <span class="fab-item-icon"><i class="fas fa-download"></i></span>
+            <button class="fab-menu-item" onclick="openVehiclesPanel()" title="Manage Vehicles">
+                <span class="fab-item-icon"><i class="fas fa-truck"></i></span>
                 <span class="fab-item-text">
-                    <span class="fab-item-title">Export CSV</span>
-                    <span class="fab-item-desc">Download as CSV</span>
+                    <span class="fab-item-title">Vehicles</span>
+                    <span class="fab-item-desc">Manage & track</span>
+                </span>
+            </button>
+            <button class="fab-menu-item" onclick="openMaintenancePanel()" title="Maintenance Reminders">
+                <span class="fab-item-icon"><i class="fas fa-tools"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">Maintenance</span>
+                    <span class="fab-item-desc">Schedule reminders</span>
+                </span>
+            </button>
+            <button class="fab-menu-item" onclick="openFuelPricePanel()" title="Fuel Price Tracking">
+                <span class="fab-item-icon"><i class="fas fa-gas-pump"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">Fuel Prices</span>
+                    <span class="fab-item-desc">Track price history</span>
                 </span>
             </button>
             <button class="fab-menu-item" onclick="showChart()" title="View Chart">
@@ -1039,6 +1258,13 @@
                 <span class="fab-item-text">
                     <span class="fab-item-title">View Chart</span>
                     <span class="fab-item-desc">Analytics & trends</span>
+                </span>
+            </button>
+            <button class="fab-menu-item" onclick="exportData()" title="Export CSV">
+                <span class="fab-item-icon"><i class="fas fa-download"></i></span>
+                <span class="fab-item-text">
+                    <span class="fab-item-title">Export CSV</span>
+                    <span class="fab-item-desc">Download as CSV</span>
                 </span>
             </button>
             <button class="fab-menu-item" onclick="confirmClearHistory()" title="Clear All">
@@ -1081,6 +1307,10 @@
     <script src="assets/js/db.js"></script>
     <script src="assets/js/push-notifications.js"></script>
     <script src="assets/js/google-sheets-sync.js"></script>
+    <script src="assets/js/google-drive-sync.js"></script>
+    <script src="assets/js/vehicles.js"></script>
+    <script src="assets/js/features.js"></script>
+    <script src="assets/js/ui-features.js"></script>
     <script src="assets/js/app.js"></script>
-</body>
-</html>
+    </body>
+    </html>

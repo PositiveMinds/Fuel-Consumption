@@ -4,10 +4,15 @@
  */
 
 const DB_NAME = 'FleetManagerDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORES = {
     fuelHistory: 'fuelHistory',
-    settings: 'settings'
+    settings: 'settings',
+    vehicles: 'vehicles',
+    photos: 'photos',
+    maintenanceReminders: 'maintenanceReminders',
+    fuelPriceHistory: 'fuelPriceHistory',
+    tags: 'tags'
 };
 
 class DatabaseManager {
@@ -47,11 +52,42 @@ class DatabaseManager {
                     const historyStore = db.createObjectStore(STORES.fuelHistory, { keyPath: 'id' });
                     historyStore.createIndex('date', 'date', { unique: false });
                     historyStore.createIndex('timestamp', 'timestamp', { unique: false });
+                    historyStore.createIndex('vehicleId', 'vehicleId', { unique: false });
                 }
 
                 // Create settings store
                 if (!db.objectStoreNames.contains(STORES.settings)) {
                     db.createObjectStore(STORES.settings, { keyPath: 'key' });
+                }
+
+                // Create vehicles store
+                if (!db.objectStoreNames.contains(STORES.vehicles)) {
+                    const vehiclesStore = db.createObjectStore(STORES.vehicles, { keyPath: 'id' });
+                    vehiclesStore.createIndex('name', 'name', { unique: false });
+                }
+
+                // Create photos store
+                if (!db.objectStoreNames.contains(STORES.photos)) {
+                    const photosStore = db.createObjectStore(STORES.photos, { keyPath: 'id' });
+                    photosStore.createIndex('entryId', 'entryId', { unique: false });
+                }
+
+                // Create maintenance reminders store
+                if (!db.objectStoreNames.contains(STORES.maintenanceReminders)) {
+                    const maintenanceStore = db.createObjectStore(STORES.maintenanceReminders, { keyPath: 'id' });
+                    maintenanceStore.createIndex('vehicleId', 'vehicleId', { unique: false });
+                    maintenanceStore.createIndex('dueDate', 'dueDate', { unique: false });
+                }
+
+                // Create fuel price history store
+                if (!db.objectStoreNames.contains(STORES.fuelPriceHistory)) {
+                    const priceStore = db.createObjectStore(STORES.fuelPriceHistory, { keyPath: 'id' });
+                    priceStore.createIndex('date', 'date', { unique: false });
+                }
+
+                // Create tags store
+                if (!db.objectStoreNames.contains(STORES.tags)) {
+                    db.createObjectStore(STORES.tags, { keyPath: 'id' });
                 }
 
                 console.log('IndexedDB stores created');

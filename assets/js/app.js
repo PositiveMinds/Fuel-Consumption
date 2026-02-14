@@ -321,12 +321,8 @@ function initMobileOptimizations() {
 // PWA Service Worker Registration
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    // Detect if running on GitHub Pages subdirectory
-    const basePath = window.location.pathname.includes('/Fuel-Consumption/') ? '/Fuel-Consumption' : '';
-    const swPath = basePath + '/sw.js';
-    
     navigator.serviceWorker
-      .register(swPath, { scope: basePath + '/' })
+      .register("/sw.js")
       .then((registration) => {
         console.log("Service Worker registered:", registration);
       })
@@ -829,6 +825,190 @@ function closeExportPanel() {
   exportOverlay.classList.remove("active");
 }
 
+// Features Panel Functions
+function openFeaturesPanel() {
+  const featuresPanel = document.getElementById("featuresPanel");
+  const featuresOverlay = document.getElementById("featuresOverlay");
+  featuresPanel.classList.add("active");
+  featuresOverlay.classList.add("active");
+}
+
+function closeFeaturesPanel() {
+  const featuresPanel = document.getElementById("featuresPanel");
+  const featuresOverlay = document.getElementById("featuresOverlay");
+  featuresPanel.classList.remove("active");
+  featuresOverlay.classList.remove("active");
+}
+
+// Entry Modal Photo & Location Helpers
+let capturedLocation = null;
+
+function captureLocationForEntry() {
+  const btn = document.getElementById("captureLocationBtn");
+  const status = document.getElementById("locationStatus");
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Capturing...';
+  
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      capturedLocation = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy
+      };
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-circle"></i> Location Captured';
+      btn.classList.add('btn-success');
+      btn.classList.remove('btn-outline-primary');
+      status.style.display = 'block';
+    },
+    (error) => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-location-arrow"></i> Capture Location';
+      Swal.fire('Error', `Location capture failed: ${error.message}`, 'error');
+    }
+  );
+}
+
+// Handle photo input change
+document.addEventListener('DOMContentLoaded', () => {
+  const photoInput = document.getElementById('photoInput');
+  if (photoInput) {
+    photoInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      const count = files.length;
+      const preview = document.getElementById('photoPreview');
+      const photoCount = document.getElementById('photoCount');
+      const thumbnails = document.getElementById('photoThumbnails');
+      
+      console.log('Photo input changed, files:', count);
+      
+      if (count > 0) {
+        photoCount.textContent = count;
+        preview.style.display = 'block';
+        thumbnails.innerHTML = '';
+        
+        // Create previews for each file
+        Array.from(files).forEach((file, index) => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const container = document.createElement('div');
+              container.style.position = 'relative';
+              container.style.borderRadius = '6px';
+              container.style.overflow = 'hidden';
+              container.style.background = '#f5f5f5';
+              container.style.border = '1px solid #ddd';
+              container.style.cursor = 'pointer';
+              
+              const img = document.createElement('img');
+              img.src = event.target.result;
+              img.style.width = '100%';
+              img.style.height = '80px';
+              img.style.objectFit = 'cover';
+              img.style.display = 'block';
+              
+              const removeBtn = document.createElement('button');
+              removeBtn.type = 'button';
+              removeBtn.innerHTML = '×';
+              removeBtn.style.position = 'absolute';
+              removeBtn.style.top = '2px';
+              removeBtn.style.right = '2px';
+              removeBtn.style.background = 'rgba(245, 73, 39, 0.9)';
+              removeBtn.style.border = 'none';
+              removeBtn.style.color = 'white';
+              removeBtn.style.borderRadius = '50%';
+              removeBtn.style.width = '24px';
+              removeBtn.style.height = '24px';
+              removeBtn.style.padding = '0';
+              removeBtn.style.cursor = 'pointer';
+              removeBtn.style.fontSize = '18px';
+              removeBtn.style.lineHeight = '1';
+              removeBtn.style.opacity = '0';
+              removeBtn.style.transition = 'opacity 0.2s';
+              removeBtn.style.display = 'flex';
+              removeBtn.style.alignItems = 'center';
+              removeBtn.style.justifyContent = 'center';
+              
+              removeBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                removePhotoFromInput(index);
+              };
+              
+              container.appendChild(img);
+              container.appendChild(removeBtn);
+              
+              container.onmouseover = () => { removeBtn.style.opacity = '1'; };
+              container.onmouseout = () => { removeBtn.style.opacity = '0'; };
+              
+              thumbnails.appendChild(container);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      } else {
+        preview.style.display = 'none';
+        thumbnails.innerHTML = '';
+      }
+    });
+  }
+});
+
+// Remove photo from input
+window.removePhotoFromInput = function(indexToRemove) {
+  const photoInput = document.getElementById('photoInput');
+  
+  // Create new FileList manually
+  const newFiles = [];
+  Array.from(photoInput.files).forEach((file, i) => {
+    if (i !== indexToRemove) {
+      newFiles.push(file);
+    }
+  });
+  
+  // Use DataTransfer to set new files
+  try {
+    const dt = new DataTransfer();
+    newFiles.forEach(file => dt.items.add(file));
+    photoInput.files = dt.files;
+  } catch (e) {
+    console.warn('Cannot remove photo:', e);
+  }
+  
+  // Refresh preview
+  photoInput.dispatchEvent(new Event('change', { bubbles: true }));
+};
+
+function resetNewEntryForm() {
+  // Reset form
+  const form = document.getElementById('fuelForm');
+  if (form) form.reset();
+  
+  // Reset location
+  capturedLocation = null;
+  const btn = document.getElementById('captureLocationBtn');
+  const status = document.getElementById('locationStatus');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-location-arrow"></i> Capture Location';
+    btn.classList.remove('btn-success');
+    btn.classList.add('btn-outline-primary');
+  }
+  if (status) status.style.display = 'none';
+  
+  // Reset photo input
+  const photoInput = document.getElementById('photoInput');
+  if (photoInput) photoInput.value = '';
+  const preview = document.getElementById('photoPreview');
+  if (preview) preview.style.display = 'none';
+  
+  // Hide results
+  const resultBox = document.getElementById('resultBox');
+  if (resultBox) resultBox.style.display = 'none';
+}
+
 const operatorSelect = document.getElementById("operator");
 const customOperatorInput = document.getElementById("customOperator");
 const equipmentSelect = document.getElementById("equipment");
@@ -1201,18 +1381,54 @@ async function calculateConsumption() {
     consumption: consumption,
     consumptionValue: consumptionValue,
     timestamp: new Date().toLocaleString(),
+    location: capturedLocation ? {
+      latitude: capturedLocation.latitude,
+      longitude: capturedLocation.longitude,
+      accuracy: capturedLocation.accuracy,
+      timestamp: new Date().toISOString()
+    } : null
   };
 
   addToHistory(record);
 
-  // Show success message
-  Swal.fire({
-    icon: "success",
-    title: "Entry Saved!",
-    text: `${operator} - ${equipment}: ${consumption}`,
-    confirmButtonColor: "#10b981",
-    timer: 2000,
-  });
+  // Handle photo uploads if any selected
+  const photoInput = document.getElementById("photoInput");
+  if (photoInput && photoInput.files.length > 0) {
+    Swal.fire({
+      title: "Uploading photos...",
+      didOpen: async () => {
+        Swal.showLoading();
+        try {
+          for (let file of photoInput.files) {
+            await handlePhotoUpload(file, record.id);
+          }
+          Swal.fire({
+            icon: "success",
+            title: "Entry & Photos Saved!",
+            text: `${operator} - ${equipment}: ${consumption}`,
+            confirmButtonColor: "#10b981",
+            timer: 2000,
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "warning",
+            title: "Entry Saved, Photos Failed",
+            text: `Entry saved but photo upload failed: ${error.message}`,
+            confirmButtonColor: "#F54927",
+          });
+        }
+      }
+    });
+  } else {
+    // Show success message
+    Swal.fire({
+      icon: "success",
+      title: "Entry Saved!",
+      text: `${operator} - ${equipment}: ${consumption}`,
+      confirmButtonColor: "#10b981",
+      timer: 2000,
+    });
+  }
 
   // Send notifications if enabled
   if (Notification.permission === "granted") {
