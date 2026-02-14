@@ -1,0 +1,23 @@
+# Credentials - Never commit these
+assets/js/google-sheets-sync.config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Node modules (if using npm)
+node_modules/
+
+# Temporary files
+~$*
+.tmp/
+temp/

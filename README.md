@@ -8,6 +8,7 @@ A progressive web application (PWA) for tracking and managing fuel consumption e
 - [Getting Started](#getting-started)
 - [Installation](#installation)
 - [Core Functionality](#core-functionality)
+- [Google Sheets Integration](#google-sheets-integration)
 - [User Interface](#user-interface)
 - [Technology Stack](#technology-stack)
 - [Data Management](#data-management)
@@ -52,6 +53,14 @@ A progressive web application (PWA) for tracking and managing fuel consumption e
 - **Statistics Cards**: Quick overview of key metrics
 - **Daily Summaries**: Aggregate data summaries
 - **Performance Metrics**: Average consumption calculations
+
+### Google Sheets Sync
+- **Two-Way Synchronization**: Push and pull data to/from Google Sheets
+- **Auto-Sync**: Configurable automatic sync intervals (default 5 minutes)
+- **Manual Sync**: Trigger sync on-demand
+- **Conflict Resolution**: Latest timestamp always wins in data conflicts
+- **Sheet ID Copy**: Save your sheet ID for reconnection or multi-device usage
+- **Multi-Device**: Connect multiple devices/users to the same spreadsheet
 
 ### Appearance
 - **Dark/Light Theme**: Toggle between dark and light modes
@@ -121,6 +130,121 @@ Then navigate to `http://localhost:8000` in your browser.
 - **Total Hours**: Sum of all operation hours
 - **Total Liters**: Sum of all fuel consumed
 - **Avg Consumption**: Average fuel consumption rate
+
+## 🔄 Google Sheets Integration
+
+### Overview
+Fleet Manager can sync all your fuel consumption data with Google Sheets, enabling centralized reporting, collaboration, and data backup. Each device/user maintains local data while syncing to a shared or personal spreadsheet.
+
+### Setup
+
+Detailed setup instructions are available in [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md). Quick start:
+
+1. **Create Google Cloud Project** - Set up API credentials
+2. **Enable Google Sheets API** - In Google Cloud Console
+3. **Create OAuth 2.0 Credentials** - For authentication
+4. **Update Configuration** - Add credentials to `google-sheets-sync.config.js`
+5. **Authenticate** - Sign in with Google from Settings panel
+6. **Connect Spreadsheet** - Create new or select existing sheet
+7. **Save Sheet ID** - Copy and store in a safe location for reconnection
+
+### How Syncing Works
+
+#### Local Storage
+- All data is stored locally on your device in IndexedDB
+- Works completely offline
+- Data persists between sessions
+
+#### Google Sheets
+- Connected data syncs to your Google Sheet
+- Each row represents one fuel entry
+- Spreadsheet can be accessed/edited from any device
+
+#### Sync Process
+
+**Bidirectional Sync:**
+1. **Pull Phase**: Fetch latest data from Google Sheets
+2. **Merge Phase**: Local data is merged with remote data
+3. **Push Phase**: Local changes are uploaded to Google Sheets
+4. **Conflict Resolution**: Latest timestamp wins (newer data overrides older)
+
+**Auto-Sync:** Runs automatically every 5 minutes (configurable)
+
+**Manual Sync:** Trigger immediately from Settings → Google Sheets Sync → "Sync Both Ways"
+
+### Multi-User & Multi-Device Scenarios
+
+#### Scenario 1: Individual User, Multiple Devices
+- **Device A** (Phone): Has entries 1-10, synced to Sheet A
+- **Device B** (Tablet): Has entries 11-20, connects to Sheet A using saved Sheet ID
+- **Device C** (Desktop): Uses same Sheet ID, downloads all entries 1-20
+- **Result**: All devices share the same spreadsheet, all data is accessible from any device
+
+#### Scenario 2: Team/Fleet Shared Sheet
+- **Admin** creates a spreadsheet and copies the Sheet ID
+- **Team Member A**: Installs app, authenticates with Google, uses the shared Sheet ID
+- **Team Member B**: Same process, connects to the same Sheet ID
+- **Team Member C**: Same process
+- **Result**: All team members' data syncs to one central spreadsheet for fleet-wide reporting
+
+#### Scenario 3: Personal vs. Shared Data
+- **Person A**: Authenticates with their Google account, creates personal Sheet A
+- **Person B**: Authenticates with their Google account, creates personal Sheet B
+- **Result**: Each person has isolated, separate data (unless they intentionally share the Sheet ID)
+
+### Saving Your Sheet ID
+
+**Why:** You'll need the Sheet ID to reconnect if you:
+- Uninstall and reinstall the app
+- Switch to a different device
+- Clear app data
+- Use the same sheet on multiple devices
+
+**How to Copy:**
+1. Open Settings (⚙️)
+2. Scroll to "Google Sheets Sync" section
+3. In "Sync Configuration" box:
+   - You'll see your Sheet ID (long alphanumeric string)
+   - Click the **"Copy ID"** button
+   - ID is now in your clipboard
+
+**Where to Save:**
+- **Password Manager** (1Password, LastPass, Bitwarden)
+- **Secure Notes** (Apple Notes, OneNote, Evernote)
+- **Cloud Storage** (Google Drive, OneDrive - in encrypted file)
+- **Paper** (Write in a safe location)
+- **Email Draft** (Save in a draft email, not sent)
+
+### Security & Privacy
+
+- **Authentication**: OAuth 2.0 - You control access through your Google account
+- **Authorization**: Only you can access your spreadsheet (unless you share it)
+- **Sheet ID**: The ID alone doesn't grant access; Google authentication is required
+- **Data**: Transmitted securely over HTTPS to Google's servers
+- **Local Storage**: All local data is unencrypted in IndexedDB (clear cache to delete)
+
+### Troubleshooting
+
+**"Invalid Client ID" Error**
+- Check that credentials in `google-sheets-sync.config.js` match your Google Cloud setup
+- Verify your domain is in Authorized JavaScript origins
+
+**"Access Denied" Error**
+- Ensure Google Sheets API is enabled in your Google Cloud Console
+- Check that the spreadsheet ID is correct
+- Verify you have permission to access the sheet
+
+**Sync Not Happening**
+- Check browser console (F12) for error messages
+- Verify you're authenticated (Settings → Google Sheets Sync)
+- Check that auto-sync is enabled and interval is set
+- Manually trigger sync to test
+
+**Lost Connection / Re-authentication Required**
+- Your access token expired (typically after ~1 hour)
+- Click "Connect Google Account" in Settings to re-authenticate
+- Your data remains safe; just need to reconnect
+- Click "Copy ID" to confirm your sheet ID is still there
 
 ## 🎨 User Interface
 
@@ -496,9 +620,11 @@ fuel/
 ├── browserconfig.xml          # Windows tile configuration
 ├── assets/
 │   ├── js/
-│   │   ├── app.js            # Main application logic
-│   │   ├── db.js             # Database management
-│   │   └── push-notifications.js  # Notification system
+│   │   ├── app.js                      # Main application logic
+│   │   ├── db.js                       # Database management
+│   │   ├── push-notifications.js       # Notification system
+│   │   ├── google-sheets-sync.js       # Google Sheets synchronization
+│   │   └── google-sheets-sync.config.js # Google Sheets API credentials
 │   ├── css/
 │   │   └── styles.css        # Custom styles and theming
 │   ├── images/
@@ -508,6 +634,7 @@ fuel/
 │   │   ├── logo-256x256.png
 │   │   └── logo-512x512.png
 │   └── lib/                  # External libraries (CDN)
+├── GOOGLE_SHEETS_SETUP.md    # Google Sheets integration guide
 ├── NOTIFICATION_SETTINGS.md  # Notification documentation
 ├── PUSH_NOTIFICATIONS.md     # Push notification setup guide
 └── README.md                 # This file
@@ -541,9 +668,17 @@ fuel/
 - [ ] Offline mode functionality
 - [ ] Mobile responsive design
 - [ ] Service Worker caching
+- [ ] Google Sheets authentication
+- [ ] Google Sheets sync (push/pull/both)
+- [ ] Sheet ID copy functionality
+- [ ] Auto-sync at configured intervals
+- [ ] Multi-device synchronization with shared Sheet ID
+- [ ] Token refresh and re-authentication
+- [ ] Conflict resolution (latest timestamp wins)
 
 ## 📄 Additional Documentation
 
+- [Google Sheets Integration Setup](GOOGLE_SHEETS_SETUP.md) - Complete guide for setting up two-way Google Sheets sync
 - [Notification Settings Guide](NOTIFICATION_SETTINGS.md) - Detailed notification configuration
 - [Push Notifications Setup](PUSH_NOTIFICATIONS.md) - Push notification implementation guide
 
@@ -561,6 +696,7 @@ This project is maintained as part of the Fuel Consumption tracking system.
 
 ---
 
-**Last Updated**: February 2026
-**Version**: 1.0
+**Last Updated**: February 14, 2026
+**Version**: 1.1
 **Status**: Production Ready
+**Latest Changes**: Google Sheets Integration with two-way sync, Sheet ID management for multi-device support
