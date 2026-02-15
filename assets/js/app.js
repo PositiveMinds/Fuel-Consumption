@@ -4629,7 +4629,7 @@ async function pullFromGoogleSheets() {
         });
 
         // Refresh display
-        showTable();
+        displayHistory();
         updateSyncStatus();
       } catch (error) {
         Swal.fire({
