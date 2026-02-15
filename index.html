@@ -1302,7 +1302,23 @@
 
     <!-- Custom Scripts -->
     <!-- Load config first (contains API credentials) -->
-    <script src="assets/js/google-sheets-sync.config.js"></script>
+    <script>
+        // Try to load the config file, but don't fail if it doesn't exist (it will be generated during GitHub deployment)
+        if (!window.GOOGLE_CONFIG) {
+            const script = document.createElement('script');
+            script.src = 'assets/js/google-sheets-sync.config.js';
+            script.onerror = () => {
+                console.warn('Google config not found - will use placeholder values. Set GOOGLE_CONFIG before authentication.');
+                window.GOOGLE_CONFIG = {
+                    CLIENT_ID: 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com',
+                    API_KEY: 'YOUR_API_KEY_HERE',
+                    SCOPES: ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
+                    DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                };
+            };
+            document.head.appendChild(script);
+        }
+    </script>
     <!-- Then load other scripts -->
     <script src="assets/js/db.js"></script>
     <script src="assets/js/push-notifications.js"></script>
