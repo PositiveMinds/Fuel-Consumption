@@ -5,8 +5,9 @@
 // Configuration - Update these values
 const CONFIG = {
   // Get these from Google Cloud Console > Credentials > OAuth 2.0
-  CLIENT_ID: '333263441804-uu487tnl7bisdlk1gmmetla51t95m4uf.apps.googleusercontent.com',
-  CLIENT_SECRET: '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',
+  // ⚠️ IMPORTANT: Keep secrets ONLY in Google Apps Script, not in GitHub
+  CLIENT_ID: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+  CLIENT_SECRET: 'YOUR_CLIENT_SECRET',
   REDIRECT_URI: 'https://positiveminds.github.io/auth-callback.html',
   
   // Your app's frontend URL
