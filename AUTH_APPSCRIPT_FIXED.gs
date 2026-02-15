@@ -21,20 +21,16 @@ const CONFIG = {
   ADMIN_EMAIL: 'positiveminds256@gmail.com'
 };
 
-// Verify CORS by checking origin
-function doOptions(e) {
-  return HtmlService.createHtmlOutput('')
-    .setHeader('Access-Control-Allow-Origin', CONFIG.FRONTEND_URL)
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type')
-    .setHeader('Access-Control-Max-Age', '86400');
+// Handle CORS preflight and POST requests
+function doPost(e) {
+  return handleRequest(e);
 }
 
-// Initialize auth - returns OAuth URL for user to click
-function doPost(e) {
-  const request = JSON.parse(e.postData.contents);
-  const action = request.action;
+function doGet(e) {
+  return handleRequest(e);
+}
 
+function handleRequest(e) {
   const response = {
     success: false,
     message: '',
@@ -42,6 +38,21 @@ function doPost(e) {
   };
 
   try {
+    // Parse request from form data or JSON
+    let request = {};
+    
+    // Try to parse from form data first
+    if (e.parameter && e.parameter.action) {
+      request.action = e.parameter.action;
+      request.code = e.parameter.code;
+      request.accessToken = e.parameter.accessToken;
+    } else if (e.postData && e.postData.contents) {
+      // Fall back to JSON parsing
+      request = JSON.parse(e.postData.contents);
+    }
+    
+    const action = request.action;
+
     if (action === 'getAuthUrl') {
       response.data = getGoogleAuthUrl();
       response.success = true;
@@ -67,6 +78,7 @@ function doPost(e) {
     }
   } catch (error) {
     response.message = error.toString();
+    Logger.log('Error: ' + error);
   }
 
   return createCorsResponse(JSON.stringify(response));
@@ -182,9 +194,10 @@ function addAuthorizedUser(userInfo) {
 // Create CORS response
 function createCorsResponse(content) {
   return HtmlService.createHtmlOutput(content)
-    .setHeader('Access-Control-Allow-Origin', CONFIG.FRONTEND_URL)
+    .setHeader('Access-Control-Allow-Origin', '*')
     .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     .setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    .setHeader('Access-Control-Max-Age', '86400')
     .setHeader('Content-Type', 'application/json');
 }
 
