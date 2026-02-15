@@ -529,7 +529,3 @@ class GoogleSheetsSyncManager {
 
 // Initialize Google Sheets Sync Manager
 const googleSheetsSync = new GoogleSheetsSyncManager();
-
-// Initialize Google Drive Sync Manager for photos
-const googleDriveSync = new GoogleDriveSyncManager();
-googleDriveSync.init();
