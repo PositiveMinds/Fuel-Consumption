@@ -58,9 +58,15 @@ class GoogleSheetsSyncManager {
                 clearInterval(checkGoogle);
                 console.log('Google Sign-In library loaded');
                 
+                // Check if GOOGLE_CONFIG is defined
+                if (!window.GOOGLE_CONFIG) {
+                    console.warn('GOOGLE_CONFIG not defined. Please ensure google-sheets-sync.config.js is loaded.');
+                    return;
+                }
+                
                 // Initialize the Google Sign-In client
                 window.google.accounts.id.initialize({
-                    client_id: GOOGLE_CONFIG.CLIENT_ID,
+                    client_id: window.GOOGLE_CONFIG.CLIENT_ID,
                     callback: (response) => this.handleSignInResponse(response)
                 });
             }
@@ -71,8 +77,13 @@ class GoogleSheetsSyncManager {
         try {
             console.log('Starting Google authentication...');
             
+            // Check if GOOGLE_CONFIG is defined
+            if (!window.GOOGLE_CONFIG) {
+                throw new Error('GOOGLE_CONFIG not defined. Please ensure google-sheets-sync.config.js is loaded with your credentials.');
+            }
+            
             // Check if credentials are configured
-            if (!GOOGLE_CONFIG.CLIENT_ID || GOOGLE_CONFIG.CLIENT_ID.includes('YOUR_')) {
+            if (!window.GOOGLE_CONFIG.CLIENT_ID || window.GOOGLE_CONFIG.CLIENT_ID.includes('YOUR_')) {
                 throw new Error('Google Sheets API credentials not configured. Please update google-sheets-sync.config.js with your Client ID and API Key.');
             }
 
@@ -88,8 +99,8 @@ class GoogleSheetsSyncManager {
 
                 // Use One Tap or OAuth consent screen
                 window.google.accounts.oauth2.initTokenClient({
-                    client_id: GOOGLE_CONFIG.CLIENT_ID,
-                    scope: GOOGLE_CONFIG.SCOPES.join(' '),
+                    client_id: window.GOOGLE_CONFIG.CLIENT_ID,
+                    scope: window.GOOGLE_CONFIG.SCOPES.join(' '),
                     callback: (response) => {
                         if (response.access_token) {
                             this.accessToken = response.access_token;
@@ -158,8 +169,8 @@ class GoogleSheetsSyncManager {
             
             // Request a new token silently
             const tokenClient = window.google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CONFIG.CLIENT_ID,
-                scope: GOOGLE_CONFIG.SCOPES.join(' '),
+                client_id: window.GOOGLE_CONFIG.CLIENT_ID,
+                scope: window.GOOGLE_CONFIG.SCOPES.join(' '),
                 callback: (response) => {
                     if (response.access_token) {
                         this.accessToken = response.access_token;

@@ -100,7 +100,7 @@ class GoogleDriveSyncManager {
                 fileName: metadata.name,
                 mimeType: driveFile.mimeType,
                 uploadedAt: driveFile.createdTime,
-                thumbnailUrl: this.getThumbnailUrl(driveFile.id)
+                thumbnailUrl: await this.getThumbnailUrl(driveFile.id)
             };
 
             await this.addPhotoRecord(photoRecord);
@@ -135,7 +135,7 @@ class GoogleDriveSyncManager {
         return await response.json();
     }
 
-    getThumbnailUrl(fileId) {
+    async getThumbnailUrl(fileId) {
         const accessToken = await db.getSetting('googleSheetsAccessToken');
         return `https://drive.google.com/thumbnail?id=${fileId}&sz=w200`;
     }

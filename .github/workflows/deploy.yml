@@ -31,7 +31,7 @@ jobs:
           const GOOGLE_CONFIG = {
               CLIENT_ID: '${{ secrets.GOOGLE_CLIENT_ID }}',
               API_KEY: '${{ secrets.GOOGLE_API_KEY }}',
-              SCOPES: ['https://www.googleapis.com/auth/spreadsheets'],
+              SCOPES: ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
               DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
           };
           
