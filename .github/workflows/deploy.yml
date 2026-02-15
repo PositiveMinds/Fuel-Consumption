@@ -24,7 +24,6 @@ jobs:
       
       - name: Create Google Sheets config with secrets
         run: |
-          # Generate the config file with secrets
           mkdir -p assets/js
           cat > assets/js/google-sheets-sync.config.js << 'EOF'
           // Google Sheets API Configuration
@@ -39,18 +38,14 @@ jobs:
           
           console.log('Google Sheets configuration loaded');
           EOF
-          
-          # Verify file was created
-          ls -la assets/js/google-sheets-sync.config.js
-       
-       - name: Setup Pages
-         uses: actions/configure-pages@v3
-       
-       - name: Upload artifact
-         uses: actions/upload-pages-artifact@v3
-         with:
-           path: '.'
-           if-no-files-found: ignore
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
       
       - name: Deploy to GitHub Pages
         id: deployment
