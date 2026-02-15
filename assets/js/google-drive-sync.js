@@ -22,9 +22,11 @@ class GoogleDriveSyncManager {
         if (this.folderId) return this.folderId;
 
         try {
-            // Check if Fleet Manager folder exists
+            const folderName = 'Fuel Consumption Photos'; // Change this to your desired folder name
+            
+            // Check if folder exists
             const response = await this.driveApiCall('GET', 
-                'https://www.googleapis.com/drive/v3/files?q=name=%27Fleet%20Manager%20Photos%27%20and%20trashed=false&spaces=drive&pageSize=1&fields=files(id,name)'
+                `https://www.googleapis.com/drive/v3/files?q=name=%27${encodeURIComponent(folderName)}%27%20and%20trashed=false&spaces=drive&pageSize=1&fields=files(id,name)`
             );
 
             if (response.files && response.files.length > 0) {
@@ -34,7 +36,7 @@ class GoogleDriveSyncManager {
                 const createResponse = await this.driveApiCall('POST',
                     'https://www.googleapis.com/drive/v3/files?fields=id',
                     {
-                        name: 'Fleet Manager Photos',
+                        name: folderName,
                         mimeType: 'application/vnd.google-apps.folder'
                     }
                 );
