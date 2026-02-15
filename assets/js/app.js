@@ -343,10 +343,11 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
   console.log("Install prompt is ready");
-  // Auto-show install modal after 2 seconds
-  setTimeout(() => {
-    showInstallModal();
-  }, 2000);
+  // Only show when user clicks install button (not auto)
+  // To auto-show, uncomment the setTimeout below
+  // setTimeout(() => {
+  //   showInstallModal();
+  // }, 2000);
 });
 
 // Show install modal
