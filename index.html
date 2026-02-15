@@ -1303,6 +1303,18 @@
     <!-- Custom Scripts -->
     <!-- Load config first (contains API credentials) - MUST load before google-sheets-sync.js -->
     <script src="assets/js/google-sheets-sync.config.js"></script>
+    <!-- Fallback if config doesn't load (uses values from GitHub Secrets) -->
+    <script>
+        if (!window.GOOGLE_CONFIG) {
+            console.warn('Config file not found - using fallback values');
+            window.GOOGLE_CONFIG = {
+                CLIENT_ID: '333263441804-uu487tnl7bisdlk1gmmetla51t95m4uf.apps.googleusercontent.com',
+                API_KEY: 'AIzaSyCPml2zhIkBqtgNgXKbA9HS1zjMtJViwkI',
+                SCOPES: ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'],
+                DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+            };
+        }
+    </script>
     <!-- Then load other scripts -->
     <script src="assets/js/db.js"></script>
     <script src="assets/js/push-notifications.js"></script>
