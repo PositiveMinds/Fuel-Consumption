@@ -849,6 +849,96 @@ function closeFeaturesPanel() {
 // Entry Modal Photo & Location Helpers
 let capturedLocation = null;
 
+// Display photos for an entry in modal
+async function displayPhotosForEntry(entryId) {
+  const photosContainer = document.getElementById('editPhotosContainer');
+  if (!photosContainer) return;
+  
+  try {
+    const photos = await googleDriveSync.getPhotosByEntryId(entryId);
+    photosContainer.innerHTML = '';
+    
+    if (photos.length === 0) {
+      photosContainer.innerHTML = '<p style="color: #999; font-size: 0.9em;">No photos attached</p>';
+      return;
+    }
+    
+    photos.forEach(photo => {
+      const photoDiv = document.createElement('div');
+      photoDiv.style.position = 'relative';
+      photoDiv.style.marginBottom = '10px';
+      photoDiv.style.borderRadius = '6px';
+      photoDiv.style.overflow = 'hidden';
+      photoDiv.style.border = '1px solid #ddd';
+      
+      const img = document.createElement('img');
+      img.src = photo.driveLink || photo.downloadLink;
+      img.style.width = '100%';
+      img.style.maxHeight = '200px';
+      img.style.objectFit = 'cover';
+      img.style.cursor = 'pointer';
+      img.title = 'Click to view in Google Drive';
+      img.onclick = () => window.open(photo.driveLink, '_blank');
+      
+      const downloadBtn = document.createElement('button');
+      downloadBtn.type = 'button';
+      downloadBtn.className = 'btn btn-sm btn-success';
+      downloadBtn.style.position = 'absolute';
+      downloadBtn.style.bottom = '5px';
+      downloadBtn.style.right = '5px';
+      downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+      downloadBtn.onclick = (e) => {
+        e.preventDefault();
+        window.open(photo.downloadLink, '_blank');
+      };
+      
+      photoDiv.appendChild(img);
+      photoDiv.appendChild(downloadBtn);
+      photosContainer.appendChild(photoDiv);
+    });
+  } catch (error) {
+    console.error('Error displaying photos:', error);
+  }
+}
+
+// View all photos for an entry in a modal
+async function viewPhotosModal(entryId) {
+  try {
+    const photos = await googleDriveSync.getPhotosByEntryId(entryId);
+    
+    if (photos.length === 0) {
+      Swal.fire('No Photos', 'This entry has no photos attached.', 'info');
+      return;
+    }
+    
+    let photosHtml = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">`;
+    photos.forEach(photo => {
+      photosHtml += `
+        <div style="border: 1px solid #ddd; border-radius: 6px; overflow: hidden; cursor: pointer;" 
+             onclick="window.open('${photo.driveLink}', '_blank')">
+          <img src="${photo.driveLink}" style="width: 100%; height: 200px; object-fit: cover;">
+          <div style="padding: 8px; background: #f9f9f9; text-align: center;">
+            <a href="${photo.downloadLink}" target="_blank" style="color: #F54927; text-decoration: none; font-size: 0.85em;">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        </div>
+      `;
+    });
+    photosHtml += `</div>`;
+    
+    Swal.fire({
+      title: `Photos (${photos.length})`,
+      html: photosHtml,
+      icon: 'info',
+      width: '90%',
+      confirmButtonText: 'Close'
+    });
+  } catch (error) {
+    Swal.fire('Error', 'Failed to load photos', 'error');
+  }
+}
+
 function captureLocationForEntry() {
   const btn = document.getElementById("captureLocationBtn");
   const status = document.getElementById("locationStatus");
@@ -1578,6 +1668,7 @@ async function displayHistory() {
          <table class="table">
              <thead>
                  <tr>
+                     <th><i class="fas fa-image"></i> Photos</th>
                      <th><i class="fas fa-map-marker-alt"></i> Site</th>
                      <th><i class="fas fa-calendar"></i> Period</th>
                      <th><i class="fas fa-calendar-day"></i> Date</th>
@@ -1595,14 +1686,22 @@ async function displayHistory() {
              <tbody>
      `;
 
-  paginatedHistory.forEach((record, index) => {
+  for (const record of paginatedHistory) {
     const distanceDisplay =
       record.distance && record.distance > 0 ? `${record.distance} km` : "-";
     const periodDisplay = record.period || "-";
     const dateDisplay = record.date || "-";
     const stationDisplay = record.station || "-";
+    
+    // Get photos for this entry
+    const photos = await googleDriveSync.getPhotosByEntryId(record.id);
+    const photoThumbnail = photos.length > 0 
+      ? `<img src="${photos[0].driveLink}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" title="${photos.length} photo(s)" onclick="viewPhotosModal('${record.id}')">`
+      : '<span style="color: #999;">-</span>';
+    
     html += `
              <tr>
+                 <td data-label="Photos">${photoThumbnail}</td>
                  <td data-label="Site"><strong>${record.site || "-"}</strong></td>
                  <td data-label="Period">${periodDisplay}</td>
                  <td data-label="Date">${dateDisplay}</td>
@@ -1624,7 +1723,7 @@ async function displayHistory() {
                  </td>
              </tr>
          `;
-  });
+  }
 
   // Calculate totals for all filtered data
   const totalHours = history.reduce(
@@ -1718,6 +1817,9 @@ async function editHistoryItem(id) {
   // Show the modal
   const editModal = new bootstrap.Modal(document.getElementById("editModal"));
   editModal.show();
+
+  // Display photos for this entry
+  await displayPhotosForEntry(id);
 
   // Initialize Air Datepicker and Select2 after modal is shown
   setTimeout(() => {
