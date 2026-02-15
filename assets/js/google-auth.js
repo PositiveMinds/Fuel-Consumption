@@ -5,7 +5,7 @@
 
 const AUTH_CONFIG = {
   // Apps Script deployment URL
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzSs5dRbdiGh9a0Op0dgAhtKUVw2NXyBBwu7eidDgc8G0HbTmSpjb__HYrUgJl_Evpp/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyqLWsXX4Lc_N7FQx5xL2aWMukHk8hb-INC74Pf1w_ypHnubwYZ0eDKKT6q-hwO0nN_/exec',
   
   // Storage keys
   STORAGE_KEYS: {
@@ -176,12 +176,15 @@ class GoogleAuth {
    */
   async callAppsScript(payload) {
     try {
+      // Convert payload to URL encoded form data to avoid CORS issues
+      const params = new URLSearchParams();
+      for (const key in payload) {
+        params.append(key, JSON.stringify(payload[key]));
+      }
+
       const response = await fetch(AUTH_CONFIG.APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
+        body: params
       });
 
       if (!response.ok) {
