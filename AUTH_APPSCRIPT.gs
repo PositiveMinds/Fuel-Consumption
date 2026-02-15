@@ -8,10 +8,10 @@ const CONFIG = {
   // ⚠️ IMPORTANT: Keep secrets ONLY in Google Apps Script, not in GitHub
   CLIENT_ID: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
   CLIENT_SECRET: 'YOUR_CLIENT_SECRET',
-  REDIRECT_URI: 'https://positiveminds.github.io/auth-callback.html',
+  REDIRECT_URI: 'https://positiveminds.github.io/Fuel-Consumption/auth-callback.html',
   
   // Your app's frontend URL
-  FRONTEND_URL: 'https://positiveminds.github.io',
+  FRONTEND_URL: 'https://positiveminds.github.io/Fuel-Consumption',
   
   // Google Sheet to store authorized users
   // Share this sheet with yourself, get the ID from the URL
