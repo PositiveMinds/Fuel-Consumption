@@ -22,11 +22,19 @@ class GoogleSheetsSyncManager {
         const storedSpreadsheetId = await db.getSetting('googleSheetsSpreadsheetId');
         const storedAccessToken = await db.getSetting('googleSheetsAccessToken');
         const storedTokenExpiresAt = await db.getSetting('googleSheetsTokenExpiresAt');
+        const storedSyncInterval = await db.getSetting('googleSheetsSyncInterval');
+        const autoSyncEnabled = await db.getSetting('autoSyncEnabled');
         
         // Restore spreadsheet ID if available
         if (storedSpreadsheetId) {
             this.spreadsheetId = storedSpreadsheetId;
             console.log('Spreadsheet ID restored from storage:', this.spreadsheetId);
+        }
+        
+        // Restore custom sync interval if available
+        if (storedSyncInterval) {
+            this.syncInterval = parseInt(storedSyncInterval) * 60 * 1000;
+            console.log('Sync interval restored:', storedSyncInterval, 'minutes');
         }
         
         // Restore authentication if token is available
@@ -41,8 +49,8 @@ class GoogleSheetsSyncManager {
                 this.startTokenRefreshTimer();
             }
             
-            // Start auto-sync on app load if both spreadsheet and token are available
-            if (this.spreadsheetId) {
+            // Start auto-sync on app load if both spreadsheet and token are available and enabled
+            if (this.spreadsheetId && autoSyncEnabled !== 'false') {
                 this.startAutoSync();
             }
         }
@@ -486,8 +494,34 @@ class GoogleSheetsSyncManager {
 
     async setSyncInterval(minutes) {
         this.syncInterval = minutes * 60 * 1000;
+        await db.setSetting('googleSheetsSyncInterval', minutes);
         // Restart auto sync with new interval
+        this.stopAutoSync();
         this.startAutoSync();
+    }
+
+    stopAutoSync() {
+        if (this.tokenRefreshInterval) {
+            clearInterval(this.tokenRefreshInterval);
+            this.tokenRefreshInterval = null;
+            console.log('Auto-sync stopped');
+        }
+    }
+
+    async enableAutoSync() {
+        await db.setSetting('autoSyncEnabled', 'true');
+        this.startAutoSync();
+        console.log('Auto-sync enabled');
+    }
+
+    async disableAutoSync() {
+        await db.setSetting('autoSyncEnabled', 'false');
+        this.stopAutoSync();
+        console.log('Auto-sync disabled');
+    }
+
+    async isAutoSyncEnabled() {
+        return (await db.getSetting('autoSyncEnabled')) !== 'false';
     }
 
     /**
@@ -546,3 +580,6 @@ class GoogleSheetsSyncManager {
 
 // Initialize Google Sheets Sync Manager
 const googleSheetsSync = new GoogleSheetsSyncManager();
+
+// Alias for compatibility
+window.googleSheetsManager = googleSheetsSync;
