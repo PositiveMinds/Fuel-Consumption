@@ -1687,6 +1687,17 @@ async function addToHistory(record) {
   await db.addFuelEntry(record);
   await displayHistory();
   await updateStats();
+  
+  // Automatically sync to Google Sheets if authenticated
+  if (window.googleSheetsManager && window.googleSheetsManager.isAuthenticated && window.googleSheetsManager.spreadsheetId) {
+    try {
+      await window.googleSheetsManager.syncToGoogleSheets();
+      console.log('Entry automatically synced to Google Sheets');
+    } catch (error) {
+      console.warn('Auto-sync to Google Sheets failed:', error);
+      // Don't show error to user as this is automatic background sync
+    }
+  }
 }
 
 // Pagination variables
@@ -2072,6 +2083,17 @@ async function saveEditedRecord() {
       await notifyEntryEdited(entryData);
     }
 
+    // Automatically sync updated entry to Google Sheets if authenticated
+    if (window.googleSheetsManager && window.googleSheetsManager.isAuthenticated && window.googleSheetsManager.spreadsheetId) {
+      try {
+        await window.googleSheetsManager.syncToGoogleSheets();
+        console.log('Updated entry automatically synced to Google Sheets');
+      } catch (error) {
+        console.warn('Auto-sync to Google Sheets failed:', error);
+        // Don't show error to user as this is automatic background sync
+      }
+    }
+
     // Close modal
     bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
 
@@ -2101,6 +2123,17 @@ function deleteHistoryItem(id) {
       // Send delete notification
       if (Notification.permission === "granted" && entry) {
         await notifyEntryDeleted(entry);
+      }
+
+      // Automatically sync deletion to Google Sheets if authenticated
+      if (window.googleSheetsManager && window.googleSheetsManager.isAuthenticated && window.googleSheetsManager.spreadsheetId) {
+        try {
+          await window.googleSheetsManager.syncToGoogleSheets();
+          console.log('Deletion automatically synced to Google Sheets');
+        } catch (error) {
+          console.warn('Auto-sync to Google Sheets failed:', error);
+          // Don't show error to user as this is automatic background sync
+        }
       }
 
       Swal.fire("Deleted!", "Entry has been removed", "success");
