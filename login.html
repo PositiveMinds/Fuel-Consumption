@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Manager - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+        }
+
+        .login-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .login-option {
+            margin-bottom: 20px;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .google-btn:hover {
+            background: #f8f8f8;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .google-btn:active {
+            transform: scale(0.98);
+        }
+
+        .google-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .google-btn i {
+            font-size: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            gap: 15px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .divider-text {
+            color: #999;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .features-list {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .features-list h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .feature-item i {
+            color: #667eea;
+            font-size: 16px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .feature-item p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .error-banner {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            color: #c33;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error-banner.show {
+            display: block;
+        }
+
+        .error-banner i {
+            margin-right: 8px;
+        }
+
+        .offline-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            font-size: 13px;
+            display: none;
+        }
+
+        .offline-notice.show {
+            display: block;
+        }
+
+        .offline-notice i {
+            margin-right: 8px;
+        }
+
+        .skip-login {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .skip-login p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .skip-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .skip-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .logo-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo-circle">
+                <i class="fas fa-gas-pump"></i>
+            </div>
+            <h1>Fleet Manager</h1>
+            <p>Fuel Consumption Tracker</p>
+        </div>
+
+        <div class="login-body">
+            <div class="error-banner" id="errorBanner">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
+            </div>
+
+            <div class="offline-notice" id="offlineNotice">
+                <i class="fas fa-wifi"></i>
+                You're offline. You can use the app locally without login.
+            </div>
+
+            <div class="login-option">
+                <button class="google-btn" id="googleLoginBtn" onclick="handleGoogleLogin()">
+                    <i class="fab fa-google"></i>
+                    <span>Sign in with Google</span>
+                </button>
+            </div>
+
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-text">Features</div>
+                <div class="divider-line"></div>
+            </div>
+
+            <div class="features-list">
+                <h3>Why Login?</h3>
+                <div class="feature-item">
+                    <i class="fas fa-cloud"></i>
+                    <p><strong>Cloud Sync:</strong> Sync your fuel data across devices</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <p><strong>Secure:</strong> Your data is protected with Google authentication</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-share"></i>
+                    <p><strong>Share:</strong> Easily share reports with your team</p>
+                </div>
+            </div>
+
+            <div class="skip-login">
+                <p>Or continue without login</p>
+                <a href="index.html" class="skip-link">Continue to App →</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/google-auth.js"></script>
+
+    <script>
+        // Check if user is already logged in
+        window.addEventListener('load', () => {
+            if (googleAuth.isTokenValid()) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Check online/offline status
+        window.addEventListener('online', () => {
+            document.getElementById('offlineNotice').classList.remove('show');
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('offlineNotice').classList.add('show');
+        });
+
+        // Check initial status
+        if (!navigator.onLine) {
+            document.getElementById('offlineNotice').classList.add('show');
+        }
+
+        async function handleGoogleLogin() {
+            const btn = document.getElementById('googleLoginBtn');
+            const errorBanner = document.getElementById('errorBanner');
+
+            try {
+                btn.classList.add('loading');
+                btn.disabled = true;
+
+                await googleAuth.startLogin();
+            } catch (error) {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+
+                document.getElementById('errorText').textContent = error.message;
+                errorBanner.classList.add('show');
+
+                console.error('Login error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
