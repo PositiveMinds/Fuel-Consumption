@@ -88,9 +88,6 @@
     
     <!-- Google Sign-In Library (new) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
-    <!-- QR Code Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
 </head>
 <body>
     <!-- Animated Splash Screen -->
@@ -1073,8 +1070,8 @@
                     <p style="color: var(--text-secondary); margin-bottom: 20px;">
                         Scan this QR code to access Fleet Manager on any device
                     </p>
-                    <div id="qrCodeContainer" style="display: flex; justify-content: center; align-items: center; padding: 20px; background: white; border-radius: 8px; margin-bottom: 20px;">
-                        <canvas id="qrCanvas"></canvas>
+                    <div id="qrCodeContainer" style="display: flex; justify-content: center; align-items: center; padding: 20px; background: white; border-radius: 8px; margin-bottom: 20px; min-height: 300px;">
+                        <p style="color: var(--text-secondary);">Generating QR code...</p>
                     </div>
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" id="appUrlInput" readonly value="">

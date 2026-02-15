@@ -11,7 +11,7 @@ function openShareQRModal() {
 }
 
 /**
- * Generate QR code for the app URL
+ * Generate QR code for the app URL using API
  */
 function generateQRCode() {
     // Get the current app URL
@@ -20,21 +20,16 @@ function generateQRCode() {
     // Set the input field value
     document.getElementById('appUrlInput').value = appUrl;
     
-    // Clear previous QR code
-    const canvas = document.getElementById('qrCanvas');
-    canvas.innerHTML = '';
-    
-    // Generate new QR code
+    // Use QR Server API to generate QR code
     try {
-        new QRCode({
-            text: appUrl,
-            width: 256,
-            height: 256,
-            colorDark: '#000000',
-            colorLight: '#FFFFFF',
-            correctLevel: QRCode.CorrectLevel.H,
-            canvas: canvas
-        });
+        const encodedUrl = encodeURIComponent(appUrl);
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodedUrl}&color=000000&bgcolor=FFFFFF`;
+        
+        const container = document.getElementById('qrCodeContainer');
+        container.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="border-radius: 8px; max-width: 256px;">`;
+        
+        // Store the API URL for download
+        window.currentQRUrl = qrApiUrl;
     } catch (error) {
         console.error('Error generating QR code:', error);
         document.getElementById('qrCodeContainer').innerHTML = 
@@ -74,33 +69,20 @@ function copyAppUrl() {
  */
 function downloadQRCode() {
     try {
-        // Get the canvas element
-        const canvas = document.getElementById('qrCanvas');
-        
-        // If it's a container, get the canvas inside it
-        let qrCanvas = canvas;
-        if (!canvas.tagName || canvas.tagName !== 'CANVAS') {
-            qrCanvas = canvas.querySelector('canvas');
-        }
-        
-        if (!qrCanvas) {
+        if (!window.currentQRUrl) {
             showNotification('QR code not found. Please try again.', 'error');
             return;
         }
         
-        // Convert canvas to blob and download
-        qrCanvas.toBlob(function(blob) {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Fleet-Manager-QR-${new Date().getTime()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(link);
-            
-            showNotification('QR code downloaded successfully!', 'success');
-        });
+        // Download the QR code image
+        const link = document.createElement('a');
+        link.href = window.currentQRUrl;
+        link.download = `Fleet-Manager-QR-${new Date().getTime()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('QR code downloaded successfully!', 'success');
     } catch (error) {
         console.error('Error downloading QR code:', error);
         showNotification('Failed to download QR code. Please try again.', 'error');
