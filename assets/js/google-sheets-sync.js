@@ -279,12 +279,15 @@ class GoogleSheetsSyncManager {
     }
 
     async syncToGoogleSheets() {
+        console.log('syncToGoogleSheets called. Authenticated:', this.isAuthenticated, 'SpreadsheetId:', this.spreadsheetId);
+        
         if (!this.isAuthenticated || !this.spreadsheetId) {
             throw new Error('Not authenticated or no spreadsheet selected');
         }
 
         try {
             const entries = await db.getAllFuelEntries();
+            console.log('Retrieved entries from DB:', entries.length, entries);
             const values = entries.map(entry => [
                 entry.id,
                 entry.site || '',
@@ -307,17 +310,24 @@ class GoogleSheetsSyncManager {
                 console.log('No entries to sync');
                 return { success: true, synced: 0 };
             }
+            
+            console.log(`Syncing ${values.length} entries to Google Sheets`, values);
 
             // Clear existing data (except headers)
-            await this.makeGoogleSheetsRequest(
-                'POST',
-                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/'Fuel Entries'!A2:O:clear`
-            );
+            try {
+                await this.makeGoogleSheetsRequest(
+                    'POST',
+                    `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/'Fuel%20Entries'!A2:O:clear`,
+                    {}
+                );
+            } catch (clearError) {
+                console.warn('Clear operation failed, proceeding anyway:', clearError);
+            }
 
             // Add all entries
             await this.makeGoogleSheetsRequest(
                 'PUT',
-                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/'Fuel Entries'!A2?valueInputOption=RAW`,
+                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/'Fuel%20Entries'!A2?valueInputOption=RAW`,
                 { values: values }
             );
 
@@ -339,7 +349,7 @@ class GoogleSheetsSyncManager {
         try {
             const response = await this.makeGoogleSheetsRequest(
                 'GET',
-                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/'Fuel Entries'!A2:O`
+                `https://sheets.googleapis.com/v4/spreadsheets/${this.spreadsheetId}/values/'Fuel%20Entries'!A2:O`
             );
 
             const rows = response.values || [];
@@ -488,6 +498,9 @@ class GoogleSheetsSyncManager {
             throw new Error('No access token. Please authenticate first.');
         }
 
+        console.log(`Making ${method} request to:`, url);
+        console.log('Data being sent:', data);
+
         const options = {
             method: method,
             mode: 'cors',
@@ -502,7 +515,9 @@ class GoogleSheetsSyncManager {
         }
 
         try {
+            console.log('Fetch options:', options);
             const response = await fetch(url, options);
+            console.log('Response status:', response.status);
             
             if (!response.ok) {
                 const error = await response.json();
@@ -519,7 +534,9 @@ class GoogleSheetsSyncManager {
                 throw new Error(error.error?.message || 'Google Sheets API error');
             }
 
-            return await response.json();
+            const responseData = await response.json();
+            console.log('Response data:', responseData);
+            return responseData;
         } catch (error) {
             console.error('Request to Google Sheets API failed:', error);
             throw error;

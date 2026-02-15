@@ -859,31 +859,32 @@ async function displayPhotosForEntry(entryId) {
     photosContainer.innerHTML = '';
     
     if (photos.length === 0) {
-      photosContainer.innerHTML = '<p style="color: #999; font-size: 0.9em;">No photos attached. Add photos below.</p>';
+      photosContainer.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9em;">No photos attached. Add photos below.</p>';
     } else {
       photos.forEach(photo => {
         const photoDiv = document.createElement('div');
         photoDiv.style.position = 'relative';
-        photoDiv.style.marginBottom = '10px';
         photoDiv.style.borderRadius = '6px';
         photoDiv.style.overflow = 'hidden';
-        photoDiv.style.border = '1px solid #ddd';
+        photoDiv.style.border = '1px solid var(--border-color)';
+        photoDiv.style.backgroundColor = 'var(--bg-secondary)';
         
         const img = document.createElement('img');
         img.src = photo.driveLink || photo.downloadLink;
         img.style.width = '100%';
-        img.style.maxHeight = '200px';
-        img.style.objectFit = 'cover';
+        img.style.height = 'auto';
+        img.style.maxHeight = '300px';
+        img.style.objectFit = 'contain';
         img.style.cursor = 'pointer';
         img.title = 'Click to view in Google Drive';
         img.onclick = () => window.open(photo.driveLink, '_blank');
         
         const btnContainer = document.createElement('div');
         btnContainer.style.position = 'absolute';
-        btnContainer.style.top = '5px';
-        btnContainer.style.right = '5px';
+        btnContainer.style.top = '8px';
+        btnContainer.style.right = '8px';
         btnContainer.style.display = 'flex';
-        btnContainer.style.gap = '5px';
+        btnContainer.style.gap = '6px';
         
         const downloadBtn = document.createElement('button');
         downloadBtn.type = 'button';
@@ -950,6 +951,7 @@ async function displayPhotosForEntry(entryId) {
 async function handleEditPhotoUpload() {
   const input = document.getElementById('editPhotoInput');
   const entryId = currentEditingId;
+  const photosContainer = document.getElementById('editPhotosContainer');
   
   if (!input.files.length || !entryId) return;
   
@@ -957,6 +959,32 @@ async function handleEditPhotoUpload() {
     Swal.fire('Not Authenticated', 'Please authenticate with Google first', 'warning');
     return;
   }
+  
+  // Show preview of selected images
+  const files = Array.from(input.files);
+  let previewHtml = '<div style="display: flex; flex-direction: column; gap: 10px;">';
+  
+  files.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.maxHeight = '300px';
+      img.style.width = '100%';
+      img.style.objectFit = 'contain';
+      img.style.borderRadius = '6px';
+      
+      const div = document.createElement('div');
+      div.style.border = '1px solid var(--border-color)';
+      div.style.borderRadius = '6px';
+      div.style.padding = '5px';
+      div.style.backgroundColor = 'var(--bg-secondary)';
+      div.appendChild(img);
+      
+      photosContainer.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
   
   Swal.fire({
     title: 'Uploading Photos...',
@@ -968,7 +996,6 @@ async function handleEditPhotoUpload() {
       
       try {
         let successCount = 0;
-        const files = Array.from(input.files);
         
         for (const file of files) {
           try {
@@ -1753,46 +1780,72 @@ async function displayHistory() {
     return;
   }
 
+  // Fetch all photos once
+  const allPhotos = {};
+  try {
+    const photos = await db.getAllPhotos ? await db.getAllPhotos() : [];
+    photos.forEach(photo => {
+      if (!allPhotos[photo.entryId]) {
+        allPhotos[photo.entryId] = [];
+      }
+      allPhotos[photo.entryId].push(photo);
+    });
+  } catch (e) {
+    console.log('Could not fetch all photos');
+  }
+
   // Calculate pagination
   const totalPages = Math.ceil(history.length / recordsPerPage);
   const startIndex = (currentPage - 1) * recordsPerPage;
   const endIndex = startIndex + recordsPerPage;
   const paginatedHistory = history.slice(startIndex, endIndex);
 
-  let html = `
-         <table class="table">
-             <thead>
-                 <tr>
-                     <th><i class="fas fa-image"></i> Photos</th>
-                     <th><i class="fas fa-map-marker-alt"></i> Site</th>
-                     <th><i class="fas fa-calendar"></i> Period</th>
-                     <th><i class="fas fa-calendar-day"></i> Date</th>
-                     <th><i class="fas fa-gas-pump"></i> Station</th>
-                     <th><i class="fas fa-user"></i> Operator</th>
-                     <th><i class="fas fa-cog"></i> Equipment</th>
-                     <th><i class="fas fa-clock"></i> Time Period</th>
-                     <th><i class="fas fa-hourglass-half"></i> Hours</th>
-                     <th><i class="fas fa-road"></i> Distance</th>
-                     <th><i class="fas fa-droplet"></i> Liters</th>
-                     <th><i class="fas fa-flame"></i> Consumption</th>
-                     <th><i class="fas fa-tools"></i> Actions</th>
-                 </tr>
-             </thead>
-             <tbody>
-     `;
+   // Fetch all photos for current page records at once
+   const allPagePhotos = {};
+   for (const record of paginatedHistory) {
+     const photos = await googleDriveSync.getPhotosByEntryId(record.id);
+     if (photos && photos.length > 0) {
+       allPagePhotos[record.id] = photos;
+     }
+   }
 
-  for (const record of paginatedHistory) {
-    const distanceDisplay =
-      record.distance && record.distance > 0 ? `${record.distance} km` : "-";
-    const periodDisplay = record.period || "-";
-    const dateDisplay = record.date || "-";
-    const stationDisplay = record.station || "-";
-    
-    // Get photos for this entry
-    const photos = await googleDriveSync.getPhotosByEntryId(record.id);
-    const photoThumbnail = photos.length > 0 
-      ? `<img src="${photos[0].driveLink}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer;" title="${photos.length} photo(s)" onclick="viewPhotosModal('${record.id}')">`
-      : '<span style="color: #999;">-</span>';
+   let html = `
+          <table class="table">
+              <thead>
+                  <tr>
+                      <th><i class="fas fa-image"></i> Photos</th>
+                      <th><i class="fas fa-map-marker-alt"></i> Site</th>
+                      <th><i class="fas fa-calendar"></i> Period</th>
+                      <th><i class="fas fa-calendar-day"></i> Date</th>
+                      <th><i class="fas fa-gas-pump"></i> Station</th>
+                      <th><i class="fas fa-user"></i> Operator</th>
+                      <th><i class="fas fa-cog"></i> Equipment</th>
+                      <th><i class="fas fa-clock"></i> Time Period</th>
+                      <th><i class="fas fa-hourglass-half"></i> Hours</th>
+                      <th><i class="fas fa-road"></i> Distance</th>
+                      <th><i class="fas fa-droplet"></i> Liters</th>
+                      <th><i class="fas fa-flame"></i> Consumption</th>
+                      <th><i class="fas fa-tools"></i> Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+      `;
+
+   for (const record of paginatedHistory) {
+     const distanceDisplay =
+       record.distance && record.distance > 0 ? `${record.distance} km` : "-";
+     const periodDisplay = record.period || "-";
+     const dateDisplay = record.date || "-";
+     const stationDisplay = record.station || "-";
+     
+     // Get photos for this entry from cache
+     const photos = allPhotos[record.id] || [];
+     let photoThumbnail = '<span style="color: var(--text-secondary);">-</span>';
+     if (photos.length > 0) {
+       const photo = photos[0];
+       const thumbUrl = photo.downloadLink || photo.thumbnailUrl;
+       photoThumbnail = thumbUrl ? `<img src="${thumbUrl}" alt="photo" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; cursor: pointer; background: var(--bg-primary); border: 1px solid var(--border-color);" title="${photos.length} photo(s)" onclick="viewPhotosModal('${record.id}'); return false;">` : '<span style="color: var(--text-secondary);">-</span>';
+     }
     
     html += `
              <tr>

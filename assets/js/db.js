@@ -195,6 +195,29 @@ class DatabaseManager {
         });
     }
 
+    async getAllPhotos() {
+        await this.initPromise;
+
+        if (!this.useIndexedDB) {
+            return JSON.parse(localStorage.getItem('photos') || '[]');
+        }
+
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([STORES.photos], 'readonly');
+            const store = transaction.objectStore(STORES.photos);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                resolve(request.result || []);
+            };
+
+            request.onerror = () => {
+                console.error('Error getting photos:', request.error);
+                resolve([]);
+            };
+        });
+    }
+
     async getFuelEntryById(id) {
         await this.initPromise;
 

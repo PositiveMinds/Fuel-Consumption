@@ -2339,6 +2339,35 @@ textarea:focus {
   background-color: var(--primary-color);
 }
 
+/* Photo Container Styling */
+#editPhotosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+#editPhotosContainer > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#editPhotosContainer img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+#editPhotosContainer button {
+  margin: 0 !important;
+}
+
 /* Modal Responsive Adjustments */
 @media (max-width: 576px) {
   .modal-body {

@@ -138,8 +138,8 @@ class GoogleDriveSyncManager {
     }
 
     async getThumbnailUrl(fileId) {
-        const accessToken = await db.getSetting('googleSheetsAccessToken');
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w200`;
+        // Use Google Drive direct view URL for images
+        return `https://drive.google.com/uc?export=view&id=${fileId}`;
     }
 
     async addPhotoRecord(photoRecord) {

@@ -88,6 +88,9 @@
     
     <!-- Google Sign-In Library (new) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
 </head>
 <body>
     <!-- Animated Splash Screen -->
@@ -122,6 +125,9 @@
                 </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openFeaturesPanel()" title="Fleet Features">
                     <i class="fas fa-star"></i> Features
+                </button>
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openShareQRModal()" title="Share App">
+                    <i class="fas fa-qrcode"></i>
                 </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="openExportPanel()" title="Settings & Reports">
                     <i class="fas fa-cog"></i> Settings
@@ -944,12 +950,15 @@
                         <hr>
 
                         <div class="mb-3">
-                            <label class="form-label"><i class="fas fa-images"></i> Attached Photos</label>
-                            <div id="editPhotosContainer" style="border: 1px solid #ddd; border-radius: 6px; padding: 15px; background: #f9f9f9; min-height: 60px;">
-                                <p style="color: #999; font-size: 0.9em; margin: 0;">Loading photos...</p>
-                            </div>
-                            <input type="file" id="editPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleEditPhotoUpload()">
-                        </div>
+                             <label class="form-label"><i class="fas fa-images"></i> Attached Photos</label>
+                             <div id="editPhotosContainer" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; background: var(--bg-primary); min-height: 100px; max-height: 500px; overflow-y: auto;">
+                                 <p style="color: var(--text-secondary); font-size: 0.9em; margin: 0;">Loading photos...</p>
+                             </div>
+                             <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="document.getElementById('editPhotoInput').click()">
+                                 <i class="fas fa-plus"></i> Add Photos
+                             </button>
+                             <input type="file" id="editPhotoInput" accept="image/*" multiple style="display: none;" onchange="handleEditPhotoUpload()">
+                         </div>
                         </form>
                 </div>
                 <div class="modal-footer">
@@ -1048,6 +1057,41 @@
                </div>
            </div>
        </div>
+    </div>
+
+    <!-- QR Code Share Modal -->
+    <div class="modal fade" id="qrCodeModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-qrcode"></i> Share Fleet Manager
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        Scan this QR code to access Fleet Manager on any device
+                    </p>
+                    <div id="qrCodeContainer" style="display: flex; justify-content: center; align-items: center; padding: 20px; background: white; border-radius: 8px; margin-bottom: 20px;">
+                        <canvas id="qrCanvas"></canvas>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="appUrlInput" readonly value="">
+                        <button class="btn btn-primary" type="button" onclick="copyAppUrl()">
+                            <i class="fas fa-copy"></i> Copy Link
+                        </button>
+                    </div>
+                    <small class="text-muted">Share this link with others to let them access Fleet Manager</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadQRCode()">
+                        <i class="fas fa-download"></i> Download QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Notification Settings Modal -->
@@ -1333,6 +1377,7 @@
     <script src="assets/js/vehicles.js"></script>
     <script src="assets/js/features.js"></script>
     <script src="assets/js/ui-features.js"></script>
+    <script src="assets/js/qr-share.js"></script>
     <script src="assets/js/app.js"></script>
     </body>
     </html>
