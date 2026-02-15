@@ -4112,6 +4112,14 @@ async function authenticateGoogleSheets() {
         const result = await googleSheetsSync.authenticateWithGoogle();
 
         if (result.success) {
+          // Ensure Google Drive folder exists for photos
+          try {
+            await googleDriveSync.ensureFolder();
+            console.log('Google Drive folder created/verified');
+          } catch (error) {
+            console.warn('Could not ensure Drive folder:', error);
+          }
+
           Swal.fire({
             title: "Success!",
             text: `Authenticated as ${result.email}`,
