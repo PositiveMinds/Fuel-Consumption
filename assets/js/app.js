@@ -859,46 +859,141 @@ async function displayPhotosForEntry(entryId) {
     photosContainer.innerHTML = '';
     
     if (photos.length === 0) {
-      photosContainer.innerHTML = '<p style="color: #999; font-size: 0.9em;">No photos attached</p>';
-      return;
+      photosContainer.innerHTML = '<p style="color: #999; font-size: 0.9em;">No photos attached. Add photos below.</p>';
+    } else {
+      photos.forEach(photo => {
+        const photoDiv = document.createElement('div');
+        photoDiv.style.position = 'relative';
+        photoDiv.style.marginBottom = '10px';
+        photoDiv.style.borderRadius = '6px';
+        photoDiv.style.overflow = 'hidden';
+        photoDiv.style.border = '1px solid #ddd';
+        
+        const img = document.createElement('img');
+        img.src = photo.driveLink || photo.downloadLink;
+        img.style.width = '100%';
+        img.style.maxHeight = '200px';
+        img.style.objectFit = 'cover';
+        img.style.cursor = 'pointer';
+        img.title = 'Click to view in Google Drive';
+        img.onclick = () => window.open(photo.driveLink, '_blank');
+        
+        const btnContainer = document.createElement('div');
+        btnContainer.style.position = 'absolute';
+        btnContainer.style.top = '5px';
+        btnContainer.style.right = '5px';
+        btnContainer.style.display = 'flex';
+        btnContainer.style.gap = '5px';
+        
+        const downloadBtn = document.createElement('button');
+        downloadBtn.type = 'button';
+        downloadBtn.className = 'btn btn-sm btn-success';
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+        downloadBtn.title = 'Download';
+        downloadBtn.onclick = (e) => {
+          e.preventDefault();
+          window.open(photo.downloadLink, '_blank');
+        };
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn btn-sm btn-danger';
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        deleteBtn.title = 'Delete';
+        deleteBtn.onclick = async (e) => {
+          e.preventDefault();
+          const confirmed = await Swal.fire({
+            title: 'Delete Photo?',
+            text: 'This will delete the photo from Google Drive and this entry.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'Delete'
+          });
+          
+          if (confirmed.isConfirmed) {
+            const deleted = await googleDriveSync.deletePhoto(photo.id);
+            if (deleted) {
+              await displayPhotosForEntry(entryId);
+              Swal.fire('Deleted', 'Photo removed', 'success');
+            } else {
+              Swal.fire('Error', 'Failed to delete photo', 'error');
+            }
+          }
+        };
+        
+        btnContainer.appendChild(downloadBtn);
+        btnContainer.appendChild(deleteBtn);
+        photoDiv.appendChild(img);
+        photoDiv.appendChild(btnContainer);
+        photosContainer.appendChild(photoDiv);
+      });
     }
     
-    photos.forEach(photo => {
-      const photoDiv = document.createElement('div');
-      photoDiv.style.position = 'relative';
-      photoDiv.style.marginBottom = '10px';
-      photoDiv.style.borderRadius = '6px';
-      photoDiv.style.overflow = 'hidden';
-      photoDiv.style.border = '1px solid #ddd';
-      
-      const img = document.createElement('img');
-      img.src = photo.driveLink || photo.downloadLink;
-      img.style.width = '100%';
-      img.style.maxHeight = '200px';
-      img.style.objectFit = 'cover';
-      img.style.cursor = 'pointer';
-      img.title = 'Click to view in Google Drive';
-      img.onclick = () => window.open(photo.driveLink, '_blank');
-      
-      const downloadBtn = document.createElement('button');
-      downloadBtn.type = 'button';
-      downloadBtn.className = 'btn btn-sm btn-success';
-      downloadBtn.style.position = 'absolute';
-      downloadBtn.style.bottom = '5px';
-      downloadBtn.style.right = '5px';
-      downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
-      downloadBtn.onclick = (e) => {
-        e.preventDefault();
-        window.open(photo.downloadLink, '_blank');
-      };
-      
-      photoDiv.appendChild(img);
-      photoDiv.appendChild(downloadBtn);
-      photosContainer.appendChild(photoDiv);
-    });
+    // Add button to upload more photos
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'btn btn-sm btn-primary mt-2';
+    addBtn.innerHTML = '<i class="fas fa-plus"></i> Add Photos';
+    addBtn.onclick = () => {
+      const input = document.getElementById('editPhotoInput');
+      if (input) input.click();
+    };
+    photosContainer.appendChild(addBtn);
+    
   } catch (error) {
     console.error('Error displaying photos:', error);
   }
+}
+
+// Handle photo upload in edit modal
+async function handleEditPhotoUpload() {
+  const input = document.getElementById('editPhotoInput');
+  const entryId = currentEditingId;
+  
+  if (!input.files.length || !entryId) return;
+  
+  if (!googleSheetsSync.isAuthenticated) {
+    Swal.fire('Not Authenticated', 'Please authenticate with Google first', 'warning');
+    return;
+  }
+  
+  Swal.fire({
+    title: 'Uploading Photos...',
+    html: 'Please wait while we upload your photos to Google Drive',
+    icon: 'info',
+    allowOutsideClick: false,
+    didOpen: async () => {
+      Swal.showLoading();
+      
+      try {
+        let successCount = 0;
+        const files = Array.from(input.files);
+        
+        for (const file of files) {
+          try {
+            const result = await googleDriveSync.uploadPhoto(file, entryId);
+            if (result) successCount++;
+          } catch (error) {
+            console.error('Error uploading photo:', error);
+          }
+        }
+        
+        input.value = '';
+        
+        Swal.fire({
+          title: 'Upload Complete',
+          text: `${successCount} of ${files.length} photos uploaded successfully`,
+          icon: successCount > 0 ? 'success' : 'warning'
+        });
+        
+        // Refresh photos display
+        await displayPhotosForEntry(entryId);
+      } catch (error) {
+        Swal.fire('Error', 'Failed to upload photos: ' + error.message, 'error');
+      }
+    }
+  });
 }
 
 // View all photos for an entry in a modal
