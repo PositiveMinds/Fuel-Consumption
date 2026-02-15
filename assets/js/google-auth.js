@@ -29,21 +29,30 @@ class GoogleAuth {
    */
   async startLogin() {
     try {
-      // Get the auth URL from Apps Script
-      const response = await this.callAppsScript({
-        action: 'getAuthUrl'
-      });
-
-      if (response.success && response.data) {
-        // Redirect to Google OAuth
-        window.location.href = response.data;
-      } else {
-        throw new Error(response.message || 'Failed to get auth URL');
-      }
+      // Generate OAuth URL directly (no need to call Apps Script)
+      const authUrl = this.getGoogleAuthUrl();
+      window.location.href = authUrl;
     } catch (error) {
       console.error('Login error:', error);
       this.showError('Login failed: ' + error.message);
     }
+  }
+
+  /**
+   * Generate Google OAuth URL
+   */
+  getGoogleAuthUrl() {
+    const clientId = encodeURIComponent('333263441804-uu487tnl7bisdlk1gmmetla51t95m4uf.apps.googleusercontent.com');
+    const redirectUri = encodeURIComponent('https://positiveminds.github.io/Fuel-Consumption/auth-callback.html');
+    const scope = encodeURIComponent('email profile');
+    
+    return 'https://accounts.google.com/o/oauth2/v2/auth?' +
+      'client_id=' + clientId +
+      '&redirect_uri=' + redirectUri +
+      '&response_type=code' +
+      '&scope=' + scope +
+      '&access_type=offline' +
+      '&prompt=consent';
   }
 
   /**
