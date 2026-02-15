@@ -321,9 +321,7 @@ function initMobileOptimizations() {
 // PWA Service Worker Registration
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    // Use relative path to work with GitHub Pages subdirectories
-    const swPath = new URL("../sw.js", import.meta.url || document.currentScript?.src || location.href).pathname;
-    // Fallback to /sw.js for direct file access
+    // Detect if running on GitHub Pages subdirectory or local
     const swUrl = window.location.pathname.includes("/Fuel-Consumption") 
       ? "/Fuel-Consumption/sw.js" 
       : "/sw.js";
