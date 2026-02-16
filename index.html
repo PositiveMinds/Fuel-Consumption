@@ -88,6 +88,25 @@
     
     <!-- Google Sign-In Library (new) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Auth Protection -->
+    <script>
+        // Check if user is authenticated before loading the page
+        (function() {
+            const AUTH_CONFIG = {
+                STORAGE_KEYS: {
+                    IS_AUTHENTICATED: 'google_auth_authenticated'
+                }
+            };
+            
+            const isAuthenticated = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.IS_AUTHENTICATED) === 'true';
+            
+            if (!isAuthenticated) {
+                // Redirect to login if not authenticated
+                window.location.href = 'login.html';
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- Animated Splash Screen -->
@@ -131,6 +150,9 @@
                 </button>
                 <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="toggleTheme()" title="Toggle Theme">
                     <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <button class="btn btn-sm" style="background: var(--primary-color); color: white;" onclick="handleLogout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
         </div>
@@ -1377,5 +1399,16 @@
     <script src="assets/js/sync-manager.js"></script>
     <script src="assets/js/qr-share.js"></script>
     <script src="assets/js/app.js"></script>
+    
+    <!-- Logout Function -->
+    <script>
+        async function handleLogout() {
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (confirmed) {
+                await googleAuth.logout();
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
     </body>
     </html>
