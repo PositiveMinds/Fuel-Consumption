@@ -44,7 +44,7 @@ class GoogleAuth {
    */
   getGoogleAuthUrl() {
     const clientId = encodeURIComponent('333263441804-uu487tnl7bisdlk1gmmetla51t95m4uf.apps.googleusercontent.com');
-    const redirectUri = encodeURIComponent('https://positiveminds.github.io/Fuel-Consumption/auth-callback.html');
+    const redirectUri = encodeURIComponent('https://fleet-fuel-tracker.netlify.app/auth-callback.html');
     const scope = encodeURIComponent('email profile');
     
     return 'https://accounts.google.com/o/oauth2/v2/auth?' +
