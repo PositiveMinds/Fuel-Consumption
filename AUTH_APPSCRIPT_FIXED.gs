@@ -22,6 +22,14 @@ const CONFIG = {
 };
 
 // Handle CORS preflight and POST requests
+function doOptions(e) {
+  return HtmlService.createHtmlOutput('')
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    .setHeader('Access-Control-Max-Age', '86400');
+}
+
 function doPost(e) {
   return handleRequest(e);
 }

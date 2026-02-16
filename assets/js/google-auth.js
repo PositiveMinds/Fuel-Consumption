@@ -5,7 +5,7 @@
 
 const AUTH_CONFIG = {
   // Apps Script deployment URL
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyyl-oT0GtMDfPdyJW8sRU-7_S9ByABl9ULvXHQ3BsEmTPk47uXWilC4G-IsfRyLK27/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxhsUwyjrA0vpiD6wqlQzXDfd2oyroCLVRmv89kTVzkgDZ2wZd1exG4ucrG-CvSsLVw/exec',
   
   // Storage keys
   STORAGE_KEYS: {
