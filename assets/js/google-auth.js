@@ -4,8 +4,9 @@
  */
 
 const AUTH_CONFIG = {
-  // Apps Script deployment URL
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxhsUwyjrA0vpiD6wqlQzXDfd2oyroCLVRmv89kTVzkgDZ2wZd1exG4ucrG-CvSsLVw/exec',
+  // Netlify Function URL (proxy to Apps Script)
+  // This avoids CORS issues by making server-to-server calls
+  AUTH_ENDPOINT: '/.netlify/functions/auth',
   
   // Storage keys
   STORAGE_KEYS: {
@@ -172,19 +173,19 @@ class GoogleAuth {
   }
 
   /**
-   * Call Apps Script backend
+   * Call Auth endpoint (Netlify Function proxy)
    */
   async callAppsScript(payload) {
     try {
-      // Convert payload to URL encoded form data to avoid CORS issues
+      // Convert payload to URL encoded form data
       const params = new URLSearchParams();
       for (const key in payload) {
         params.append(key, JSON.stringify(payload[key]));
       }
 
-      const response = await fetch(AUTH_CONFIG.APPS_SCRIPT_URL, {
+      const response = await fetch(AUTH_CONFIG.AUTH_ENDPOINT, {
         method: 'POST',
-        body: params
+        body: params.toString()
       });
 
       if (!response.ok) {
@@ -193,7 +194,7 @@ class GoogleAuth {
 
       return JSON.parse(await response.text());
     } catch (error) {
-      console.error('Apps Script call error:', error);
+      console.error('Auth endpoint error:', error);
       throw error;
     }
   }
