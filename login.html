@@ -298,14 +298,21 @@
         </div>
     </div>
 
-    <script src="assets/js/google-auth.js"></script>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Supabase Auth Module -->
+    <script src="assets/js/supabase-auth.js"></script>
 
     <script>
         // Check if user is already logged in
         window.addEventListener('load', () => {
-            if (googleAuth.isTokenValid()) {
-                window.location.href = 'index.html';
-            }
+            // Wait for auth initialization
+            setTimeout(() => {
+                if (supabaseAuth.isTokenValid()) {
+                    window.location.href = 'index.html';
+                }
+            }, 500);
         });
 
         // Check online/offline status
@@ -330,7 +337,7 @@
                 btn.classList.add('loading');
                 btn.disabled = true;
 
-                await googleAuth.startLogin();
+                await supabaseAuth.startLogin();
             } catch (error) {
                 btn.classList.remove('loading');
                 btn.disabled = false;

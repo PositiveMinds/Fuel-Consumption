@@ -203,8 +203,11 @@
     <!-- Add FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Import auth module -->
-    <script src="assets/js/google-auth.js"></script>
+    <script src="assets/js/supabase-auth.js"></script>
 
     <script>
         /**
@@ -212,21 +215,16 @@
          */
         async function handleAuthCallback() {
             try {
-                // Get authorization code from URL
+                // Get error from URL if present
                 const params = new URLSearchParams(window.location.search);
-                const code = params.get('code');
                 const error = params.get('error');
 
                 if (error) {
-                    throw new Error(`Google returned error: ${error}`);
+                    throw new Error(`Authentication error: ${error}`);
                 }
 
-                if (!code) {
-                    throw new Error('No authorization code received from Google');
-                }
-
-                // Handle the callback
-                const success = await googleAuth.handleCallback(code);
+                // Handle the callback with Supabase
+                const success = await supabaseAuth.handleCallback();
 
                 if (success) {
                     showSuccess();
@@ -255,7 +253,7 @@
             document.getElementById('successMessage').classList.add('show');
 
             // Show user info
-            const userInfo = googleAuth.getUserInfo();
+            const userInfo = supabaseAuth.getUserInfo();
             if (userInfo) {
                 document.getElementById('userEmail').textContent = userInfo.email;
                 document.getElementById('userInfo').classList.add('show');

@@ -89,22 +89,27 @@
     <!-- Google Sign-In Library (new) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Supabase Auth Module -->
+    <script src="assets/js/supabase-auth.js"></script>
+    
     <!-- Auth Protection -->
     <script>
         // Check if user is authenticated before loading the page
         (function() {
-            const AUTH_CONFIG = {
-                STORAGE_KEYS: {
-                    IS_AUTHENTICATED: 'google_auth_authenticated'
+            const checkAuth = setInterval(() => {
+                if (window.supabaseAuth) {
+                    clearInterval(checkAuth);
+                    if (!supabaseAuth.isTokenValid()) {
+                        window.location.href = 'login.html';
+                    }
                 }
-            };
+            }, 100);
             
-            const isAuthenticated = localStorage.getItem(AUTH_CONFIG.STORAGE_KEYS.IS_AUTHENTICATED) === 'true';
-            
-            if (!isAuthenticated) {
-                // Redirect to login if not authenticated
-                window.location.href = 'login.html';
-            }
+            // Timeout after 5 seconds
+            setTimeout(() => clearInterval(checkAuth), 5000);
         })();
     </script>
 </head>
@@ -1405,7 +1410,7 @@
         async function handleLogout() {
             const confirmed = confirm('Are you sure you want to logout?');
             if (confirmed) {
-                await googleAuth.logout();
+                await supabaseAuth.logout();
                 window.location.href = 'login.html';
             }
         }
